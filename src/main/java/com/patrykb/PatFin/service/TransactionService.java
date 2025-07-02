@@ -1,0 +1,28 @@
+package com.patrykb.PatFin.service;
+import com.patrykb.PatFin.dto.TransactionDto;
+import com.patrykb.PatFin.model.Transaction;
+import com.patrykb.PatFin.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TransactionService {
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    public List<Transaction> findAll() {
+        return transactionRepository.findAll();
+    }
+
+    public Transaction save(TransactionDto dto) {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(dto.getAmount());
+        transaction.setDescription(dto.getDescription());
+        transaction.setDate(dto.getDate());
+        transaction.setType(dto.getType());
+        return transactionRepository.save(transaction);
+    }
+}
