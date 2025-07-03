@@ -1,4 +1,5 @@
 package com.patrykb.PatFin.dto;
+
 import com.patrykb.PatFin.model.enums.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,14 +13,15 @@ public class TransactionDto {
 
     public TransactionDto() {
     }
-    public TransactionDto(BigDecimal amount, String description, LocalDate date, TransactionType type, Long categoryId) {
+
+    public TransactionDto(BigDecimal amount, String description, LocalDate date, TransactionType type,
+            Long categoryId) {
         this.amount = amount;
         this.description = description;
         this.date = date;
         this.type = type;
         this.categoryId = categoryId;
     }
-
 
     // Getters and Setters
     public BigDecimal getAmount() {
@@ -29,7 +31,7 @@ public class TransactionDto {
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
-    
+
     public String getDescription() {
         return description;
     }
@@ -57,10 +59,9 @@ public class TransactionDto {
     public Long getCategoryId() {
         return categoryId;
     }
-    
+
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
 }
-

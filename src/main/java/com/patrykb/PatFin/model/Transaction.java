@@ -1,14 +1,15 @@
 package com.patrykb.PatFin.model;
+
 import com.patrykb.PatFin.model.enums.TransactionType;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
 @Entity
 @Table(name = "transactions")
 public class Transaction {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private BigDecimal amount;
@@ -19,6 +20,7 @@ public class Transaction {
     private TransactionType type; // INCOME / EXPENSE
 
     @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToOne
@@ -27,7 +29,9 @@ public class Transaction {
 
     public Transaction() {
     }
-    public Transaction(BigDecimal amount, String description, LocalDate date, TransactionType type, Category category, User user) {
+
+    public Transaction(BigDecimal amount, String description, LocalDate date, TransactionType type, Category category,
+            User user) {
         this.amount = amount;
         this.description = description;
         this.date = date;
@@ -40,7 +44,7 @@ public class Transaction {
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
