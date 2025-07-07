@@ -12,6 +12,10 @@ export const routes: Routes = [
         path: 'transactions',
         loadComponent: () => import('./transactions/transactions-list/transactions-list').then(m => m.TransactionsList)
     },
+    {
+        path: 'statistics',
+        loadComponent: () => import('./statistics/statistics.component').then(m => m.StatisticsComponent)
+    },
     { 
         path: 'admin/categories', 
         component: CategoriesAdminComponent, 

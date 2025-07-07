@@ -40,4 +40,8 @@ export class TransactionsList {
   addCategory() {
     this.router.navigate(['/admin/categories']);
   }
+
+  viewStatistics() {
+    this.router.navigate(['/statistics']);
+  }
 }

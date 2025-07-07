@@ -1,0 +1,103 @@
+<div class="statistics-container">
+  <h2>📊 Statystyki finansowe</h2>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading()" class="loading">
+    <p>Ładowanie statystyk...</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error()" class="error">
+    <p>{{ error() }}</p>
+    <button (click)="loadStatistics()">Spróbuj ponownie</button>
+  </div>
+
+  <!-- Statistics content -->
+  <div *ngIf="!loading() && !error() && overallStats()" class="stats-content">
+    
+    <!-- Overview cards -->
+    <div class="overview-cards">
+      <div class="stat-card income">
+        <h3>💰 Łączne przychody</h3>
+        <p class="amount">{{ overallStats()!.totalIncome | currency:'PLN':'symbol':'1.2-2' }}</p>
+      </div>
+      
+      <div class="stat-card expenses">
+        <h3>💸 Łączne wydatki</h3>
+        <p class="amount">{{ overallStats()!.totalExpenses | currency:'PLN':'symbol':'1.2-2' }}</p>
+      </div>
+      
+      <div class="stat-card balance" [class.positive]="overallStats()!.currentBalance >= 0" [class.negative]="overallStats()!.currentBalance < 0">
+        <h3>📈 Obecny balans</h3>
+        <p class="amount">{{ overallStats()!.currentBalance | currency:'PLN':'symbol':'1.2-2' }}</p>
+      </div>
+      
+      <div class="stat-card transactions">
+        <h3>📋 Liczba transakcji</h3>
+        <p class="amount">{{ overallStats()!.totalTransactions }}</p>
+      </div>
+    </div>
+
+    <!-- Charts section -->
+    <div class="charts-section">
+      
+      <!-- Expenses by category pie chart -->
+      <div class="chart-container" *ngIf="overallStats()!.expensesByCategory.length > 0">
+        <h3>📊 Wydatki według kategorii</h3>
+        <div class="chart-wrapper">
+          <canvas #pieChartCanvas></canvas>
+        </div>
+        <!-- Tabela z danymi pod wykresem -->
+        <div class="chart-data">
+          <div class="category-list">
+            <div *ngFor="let category of overallStats()!.expensesByCategory" class="category-item">
+              <span class="category-name">{{ category.categoryName }}</span>
+              <span class="category-amount">{{ category.totalAmount | currency:'PLN':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly stats bar chart -->
+      <div class="chart-container" *ngIf="overallStats()!.monthlyStats.length > 0">
+        <h3>📅 Miesięczne przychody vs wydatki</h3>
+        <div class="chart-wrapper">
+          <canvas #barChartCanvas></canvas>
+        </div>
+        <!-- Tabela z danymi pod wykresem -->
+        <div class="chart-data">
+          <div class="monthly-list">
+            <div *ngFor="let month of overallStats()!.monthlyStats.slice(-6)" class="month-item">
+              <span class="month-name">{{ getMonthName(month.month) }} {{ month.year }}</span>
+              <span class="month-income">+{{ month.totalIncome | currency:'PLN':'symbol':'1.2-2' }}</span>
+              <span class="month-expenses">-{{ month.totalExpenses | currency:'PLN':'symbol':'1.2-2' }}</span>
+              <span class="month-balance" [class.positive]="month.balance >= 0" [class.negative]="month.balance < 0">
+                {{ month.balance | currency:'PLN':'symbol':'1.2-2' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Income by category -->
+      <div class="chart-container" *ngIf="overallStats()!.incomeByCategory.length > 0">
+        <h3>💰 Przychody według kategorii</h3>
+        <div class="chart-wrapper">
+          <div class="category-list">
+            <div *ngFor="let category of overallStats()!.incomeByCategory" class="category-item income-item">
+              <span class="category-name">{{ category.categoryName }}</span>
+              <span class="category-amount">{{ category.totalAmount | currency:'PLN':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Refresh button -->
+    <div class="refresh-section">
+      <button (click)="refreshData()" class="refresh-button">🔄 Odśwież dane</button>
+    </div>
+
+  </div>
+</div>

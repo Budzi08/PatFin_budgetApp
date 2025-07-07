@@ -1,5 +1,10 @@
 <h2>Twoje transakcje</h2>
-<button *ngIf="isAdmin" (click)="addCategory()">Dodaj kategorię</button>
+
+<div class="action-buttons">
+  <button *ngIf="isAdmin" (click)="addCategory()">Dodaj kategorię</button>
+  <button (click)="viewStatistics()" class="stats-button">📊 Zobacz statystyki</button>
+</div>
+
 <app-transactions-add (ngsubmit)="onTransactionAdded()"></app-transactions-add>
 <table *ngIf="transactions().length > 0" border="1">
   <thead>

@@ -1,7 +1,9 @@
 package com.patrykb.PatFin.controller;
 
+import com.patrykb.PatFin.dto.StatisticsDto;
 import com.patrykb.PatFin.model.Transaction;
 import com.patrykb.PatFin.model.User;
+import com.patrykb.PatFin.service.StatisticsService;
 import com.patrykb.PatFin.service.TransactionService;
 import com.patrykb.PatFin.service.UserService;
 import com.patrykb.PatFin.model.enums.TransactionType;
@@ -21,6 +23,9 @@ public class StatisticsController {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private StatisticsService statisticsService;
 
     @Autowired
     private UserService userService;
@@ -93,6 +98,32 @@ public class StatisticsController {
         });
 
         return result;
+    }
+
+    // Nowe endpoint'y dla wykresów
+    @GetMapping("/overview")
+    public StatisticsDto.OverallStats getOverallStats() {
+        User user = getCurrentUser();
+        return statisticsService.getOverallStats(user);
+    }
+
+    @GetMapping("/categories/{type}")
+    public List<StatisticsDto.CategoryStats> getCategoryStats(@PathVariable String type) {
+        User user = getCurrentUser();
+        TransactionType transactionType = TransactionType.valueOf(type.toUpperCase());
+        return statisticsService.getCategoryStats(user, transactionType);
+    }
+
+    @GetMapping("/monthly-detailed")
+    public List<StatisticsDto.MonthlyStats> getDetailedMonthlyStats() {
+        User user = getCurrentUser();
+        return statisticsService.getMonthlyStats(user);
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        return userService.findByEmail(email);
     }
 
 }
