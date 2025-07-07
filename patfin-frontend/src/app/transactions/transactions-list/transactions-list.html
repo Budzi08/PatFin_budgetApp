@@ -1,0 +1,26 @@
+<h2>Twoje transakcje</h2>
+<button *ngIf="isAdmin" (click)="addCategory()">Dodaj kategorię</button>
+<app-transactions-add (ngsubmit)="onTransactionAdded()"></app-transactions-add>
+<table *ngIf="transactions().length > 0" border="1">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Opis</th>
+      <th>Kategoria</th>
+      <th>Typ</th>
+      <th>Kwota</th>
+      <th>Usuń</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let tx of transactions()">
+      <td>{{ tx.date | date }}</td>
+      <td>{{ tx.description }}</td>
+      <td>{{ tx.category?.name || '-' }}</td>
+      <td>{{ tx.type }}</td>
+      <td>{{ tx.amount }}</td>
+      <td><button (click)="delete(tx.id)">Usuń</button></td>
+    </tr>
+  </tbody>
+</table>
+<div *ngIf="transactions().length === 0">Brak transakcji</div>

@@ -14,6 +14,7 @@ public class User {
 
     private String password;
     private LocalDateTime createdAt;
+    private boolean isAdmin;
 
     @OneToMany(mappedBy = "user")
     private List<Transaction> transactions;
@@ -28,8 +29,14 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
+    public boolean isAdmin() {
+        return isAdmin;
+    }
 
-    // Getters and Setters
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
     public Long getId() {
         return id;
     }

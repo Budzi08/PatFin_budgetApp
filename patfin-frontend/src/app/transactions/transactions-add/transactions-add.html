@@ -1,0 +1,16 @@
+<h3>Dodaj transakcję</h3>
+<form (ngSubmit)="addTransaction()" #form="ngForm">
+    <input type="number" name="amount" [(ngModel)]="amount" placeholder="Kwota" name = "amount" required />
+    <input type="text" name="description" [(ngModel)]="description" placeholder="Opis" required />
+    <input type="date" name="date" [(ngModel)]="date" required />
+    <select name="type" [(ngModel)]="type" required>
+        <option value="INCOME">Przychód</option>
+        <option value="EXPENSE">Wydatek</option>
+    </select>
+    <select [(ngModel)]="categoryId" name="categoryId" required>
+        <option value="">Wybierz kategorię</option>
+        <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
+    </select>
+    <button type="submit">Dodaj</button>
+</form>
+<div *ngIf="success" class="success-msg">Dodano transakcję!</div>

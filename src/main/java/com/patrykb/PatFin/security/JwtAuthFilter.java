@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
+import java.util.List;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -29,7 +29,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = extractToken(request);
         if (token != null && jwtUtil.validateToken(token)) {
             String email = jwtUtil.extractEmail(token);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, null, null);
+            boolean isAdmin = jwtUtil.extractIsAdmin(token);
+
+            System.out.println("JWT Debug - Email: " + email + ", isAdmin: " + isAdmin);
+
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, null,
+                    isAdmin ? List.of(() -> "ADMIN") : List.of());
+
+            System.out.println("Authorities: " + auth.getAuthorities());
+
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }

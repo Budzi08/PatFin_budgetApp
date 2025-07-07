@@ -1,0 +1,15 @@
+<div class="admin-panel">
+  <h2>Kategorie (Panel administratora)</h2>
+  <form (submit)="addCategory(); $event.preventDefault()">
+    <input [(ngModel)]="newCategory" placeholder="Nowa kategoria" name="categoryName" required>
+    <button type="submit">Dodaj</button>
+  </form>
+  <div *ngIf="isLoading">Ładowanie...</div>
+  <ul>
+    <li *ngFor="let c of categories">
+      {{ c.name }}
+      <button (click)="deleteCategory(c.id)">Usuń</button>
+    </li>
+  </ul>
+  <div *ngIf="error">{{ error }}</div>
+</div>

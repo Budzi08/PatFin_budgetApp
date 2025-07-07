@@ -1,13 +1,11 @@
 package com.patrykb.PatFin.controller;
 
 import com.patrykb.PatFin.model.Category;
-import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.service.CategoryService;
-import com.patrykb.PatFin.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,28 +17,27 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private UserService userService;
-
     @GetMapping
-    public List<Category> getUserCategories() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userService.findByEmail(email);
-        return categoryService.getUserCategories(user);
+    public List<Category> getAll() {
+        return categoryService.findAll();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public Category addCategory(@RequestBody CategoryDto dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userService.findByEmail(email);
-        return categoryService.createCategory(dto.getName(), user);
+    public Category add(@RequestBody Category category) {
+        return categoryService.save(category);
     }
-}
 
-class CategoryDto {
-    private String name;
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        categoryService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin")
+    public List<Category> getCategoriesForAdmin() {
+        return categoryService.findAll();
+    }
 }

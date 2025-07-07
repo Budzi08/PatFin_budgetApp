@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.patrykb.PatFin.model.User;
+import com.patrykb.PatFin.dto.RegisterRequest;
 
-// Endpoint: /api/auth
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -22,7 +22,7 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         try {
             userService.registerUser(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok("User registered successfully!");
+            return ResponseEntity.ok("Rejestaracja zakończona sukcesem");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -32,9 +32,9 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
         if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
+            return ResponseEntity.status(401).body("Złe dane logowania");
         }
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(), user.isAdmin());
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
@@ -68,27 +68,6 @@ public class AuthController {
 
         public String getToken() {
             return token;
-        }
-    }
-
-    class RegisterRequest {
-        private String email;
-        private String password;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
         }
     }
 }
