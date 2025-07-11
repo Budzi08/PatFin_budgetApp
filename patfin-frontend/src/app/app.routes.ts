@@ -5,8 +5,16 @@ import { adminGuard } from './core/admin-guard';
 
 export const routes: Routes = [
     {
+        path: '',
+        loadComponent: () => import('./home/home.component').then(m => m.HomeComponent)
+    },
+    {
         path: 'login',
         loadComponent: () => import('./auth/login/login').then(m => m.Login)
+    },
+    {
+        path: 'register',
+        loadComponent: () => import('./auth/register/register').then(m => m.Register)
     },
     {
         path: 'transactions',
@@ -21,6 +29,5 @@ export const routes: Routes = [
         component: CategoriesAdminComponent, 
         canActivate: [adminGuard] 
     },
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: '**', redirectTo: 'login' }
+    { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

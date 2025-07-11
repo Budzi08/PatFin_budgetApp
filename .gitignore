@@ -72,3 +72,58 @@ yarn-error.log*
 /.cache/
 /dist/
 /coverage/
+
+# Spring Boot specifics
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Local environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Package-lock files (jeśli używasz yarn zamiast npm)
+# package-lock.json
+
+# VS Code workspace settings
+*.code-workspace
+
+# Frontend specific
+/patfin-frontend/dist/
+/patfin-frontend/.angular/
+/patfin-frontend/coverage/
+/patfin-frontend/.sass-cache/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Additional IDE files
+*.swp
+*.swo
+*~
+
+# MacOS
+.AppleDouble
+.LSOverride
+
+# Windows
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/

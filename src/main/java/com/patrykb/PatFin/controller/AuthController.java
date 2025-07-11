@@ -19,12 +19,12 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             userService.registerUser(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok("Rejestaracja zakończona sukcesem");
+            return ResponseEntity.ok(new RegisterResponse("Rejestracja zakończona sukcesem"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -32,7 +32,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
         if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Złe dane logowania");
+            return ResponseEntity.status(401).body(new ErrorResponse("Invalid email or password"));
         }
         String token = jwtUtil.generateToken(user.getEmail(), user.isAdmin());
         return ResponseEntity.ok(new JwtResponse(token));
@@ -68,6 +68,30 @@ public class AuthController {
 
         public String getToken() {
             return token;
+        }
+    }
+
+    static class RegisterResponse {
+        private String message;
+
+        public RegisterResponse(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    static class ErrorResponse {
+        private String error;
+
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
+
+        public String getError() {
+            return error;
         }
     }
 }

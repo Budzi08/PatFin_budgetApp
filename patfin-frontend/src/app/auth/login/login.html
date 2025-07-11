@@ -1,6 +1,134 @@
-<form (ngSubmit)="onLogin()">
-  <input type="email" [(ngModel)]="email" name="email" placeholder="E-mail" required />
-  <input type="password" [(ngModel)]="password" name="password" placeholder="Hasło" required />
-  <button type="submit">Zaloguj</button>
-</form>
-<div *ngIf="error">{{ error }}</div>
+<div class="login-container">
+  <!-- Header -->
+  <header class="auth-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo" (click)="navigateToHome()">
+          <h1>💰 PatFin</h1>
+          <span class="tagline">Zarządzaj swoimi finansami</span>
+        </div>
+        
+        <nav class="nav-buttons">
+          <button class="btn btn-outline" (click)="navigateToHome()">
+            🏠 Strona główna
+          </button>
+          <button class="btn btn-text" (click)="navigateToRegister()">
+            Nie masz konta? <strong>Zarejestruj się</strong>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Form Section -->
+  <section class="auth-section">
+    <div class="container">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header-card">
+            <h2 class="auth-title">🔐 Zaloguj się</h2>
+            <p class="auth-subtitle">Witaj z powrotem! Zaloguj się do swojego konta PatFin</p>
+          </div>
+
+          <form class="auth-form" (ngSubmit)="onLogin()">
+            <div class="form-group">
+              <label for="email">Adres e-mail</label>
+              <input 
+                type="email" 
+                id="email"
+                class="form-input"
+                [(ngModel)]="email" 
+                name="email" 
+                placeholder="jan.kowalski@example.com" 
+                required 
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Hasło</label>
+              <div class="password-input-wrapper">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  id="password"
+                  class="form-input"
+                  [(ngModel)]="password" 
+                  name="password" 
+                  placeholder="Wprowadź swoje hasło" 
+                  required 
+                  autocomplete="current-password"
+                />
+                <button 
+                  type="button" 
+                  class="password-toggle"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="showPassword ? 'Ukryj hasło' : 'Pokaż hasło'"
+                >
+                  {{ showPassword ? '🙈' : '👁️' }}
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              class="btn btn-primary btn-full"
+              [disabled]="isLoading"
+              [class.loading]="isLoading"
+            >
+              <span *ngIf="!isLoading">🚀 Zaloguj się</span>
+              <span *ngIf="isLoading" class="loading-content">
+                <span class="spinner"></span>
+                Logowanie...
+              </span>
+            </button>
+
+            <button type="button" class="btn btn-outline btn-full" (click)="navigateToRegister()">
+              ✨ Stwórz nowe konto
+            </button>
+          </form>
+
+          <div class="error-message" *ngIf="error">
+            <div class="error-content">
+              <span class="error-icon">⚠️</span>
+              <span>{{ error }}</span>
+              <button type="button" class="error-close" (click)="error = ''">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side Info -->
+        <div class="auth-info">
+          <div class="info-content">
+            <h3>Dlaczego PatFin?</h3>
+            
+            <div class="benefits-list">
+              <div class="benefit-item">
+                <span class="benefit-icon">📊</span>
+                <div>
+                  <h4>Przejrzyste statystyki</h4>
+                  <p>Analizuj swoje wydatki za pomocą interaktywnych wykresów</p>
+                </div>
+              </div>
+              
+              <div class="benefit-item">
+                <span class="benefit-icon">🔒</span>
+                <div>
+                  <h4>Bezpieczne dane</h4>
+                  <p>Twoje informacje finansowe są chronione najwyższymi standardami</p>
+                </div>
+              </div>
+              
+              <div class="benefit-item">
+                <span class="benefit-icon">⚡</span>
+                <div>
+                  <h4>Szybkie zarządzanie</h4>
+                  <p>Dodawaj transakcje i kategoryzuj wydatki w kilka sekund</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

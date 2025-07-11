@@ -3,6 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 
+interface RegisterResponse {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,7 +25,7 @@ export class AuthService {
   }
 
   register(email: string, password: string) {
-    return this.http.post(`${this.baseUrl}/register`, { email, password });
+    return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, { email, password });
   }
 
   logout() {
@@ -46,6 +50,31 @@ export class AuthService {
     } catch (error) {
       console.log('AuthService: Error decoding token:', error);
       return false;
+    }
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp > currentTime;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  getCurrentUserEmail(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.sub || decoded.email || null;
+    } catch (error) {
+      return null;
     }
   }
 }

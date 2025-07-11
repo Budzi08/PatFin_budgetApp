@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.enums.TransactionType;
 
@@ -34,5 +35,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // Liczba transakcji użytkownika
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.user = :user")
     Long countByUser(@Param("user") User user);
+    
+    // Proste filtrowanie transakcji - bez null checks
+    @Query("SELECT t FROM Transaction t " +
+           "WHERE t.user = :user " +
+           "ORDER BY t.date DESC")
+    List<Transaction> findTransactionsWithFilters(
+        @Param("user") User user,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("minAmount") BigDecimal minAmount,
+        @Param("maxAmount") BigDecimal maxAmount,
+        @Param("type") TransactionType type,
+        @Param("categoryId") Long categoryId
+    );
 }
-

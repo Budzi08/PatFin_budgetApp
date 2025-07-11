@@ -1,1 +1,135 @@
-<p>register works!</p>
+<div class="register-container">
+  <!-- Header -->
+  <header class="auth-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo" (click)="navigateToHome()">
+          <h1>💰 PatFin</h1>
+          <span class="tagline">Zarządzaj swoimi finansami</span>
+        </div>
+        
+        <nav class="nav-buttons">
+          <button class="btn btn-outline" (click)="navigateToHome()">
+            🏠 Strona główna
+          </button>
+          <button class="btn btn-text" (click)="navigateToLogin()">
+            Masz już konto? <strong>Zaloguj się</strong>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Register Form Section -->
+  <section class="auth-section">
+    <div class="container">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header-card">
+            <h2 class="auth-title">✨ Załóż konto</h2>
+            <p class="auth-subtitle">Rozpocznij zarządzanie swoimi finansami z PatFin</p>
+          </div>
+
+          <form class="auth-form" (ngSubmit)="onRegister()">
+            <div class="form-group">
+              <label for="email">Adres e-mail</label>
+              <input 
+                type="email" 
+                id="email"
+                class="form-input"
+                [(ngModel)]="email" 
+                name="email" 
+                placeholder="jan.kowalski@example.com" 
+                required 
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Hasło</label>
+              <input 
+                type="password" 
+                id="password"
+                class="form-input"
+                [(ngModel)]="password" 
+                name="password" 
+                placeholder="Minimum 6 znaków" 
+                required 
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Potwierdź hasło</label>
+              <input 
+                type="password" 
+                id="confirmPassword"
+                class="form-input"
+                [(ngModel)]="confirmPassword" 
+                name="confirmPassword" 
+                placeholder="Wprowadź hasło ponownie" 
+                required 
+                autocomplete="new-password"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+              🚀 Stwórz konto
+            </button>
+
+            <button type="button" class="btn btn-outline btn-full" (click)="navigateToLogin()">
+              🔐 Zaloguj się do istniejącego konta
+            </button>
+          </form>
+
+          <div class="error-message" *ngIf="error">
+            <div class="error-content">
+              <span class="error-icon">⚠️</span>
+              <span>{{ error }}</span>
+            </div>
+          </div>
+
+          <div class="success-message" *ngIf="success">
+            <div class="success-content">
+              <span class="success-icon">✅</span>
+              <span>{{ success }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side Info -->
+        <div class="auth-info">
+          <div class="info-content">
+            <h3>Rozpocznij swoją finansową podróż</h3>
+            
+            <div class="benefits-list">
+              <div class="benefit-item">
+                <span class="benefit-icon">🆓</span>
+                <div>
+                  <h4>Całkowicie za darmo</h4>
+                  <p>Bez opłat, bez ukrytych kosztów. PatFin jest w 100% darmowy</p>
+                </div>
+              </div>
+              
+              <div class="benefit-item">
+                <span class="benefit-icon">⚡</span>
+                <div>
+                  <h4>Szybka konfiguracja</h4>
+                  <p>Załóż konto w mniej niż minutę i zacznij zarządzać finansami</p>
+                </div>
+              </div>
+              
+              <div class="benefit-item">
+                <span class="benefit-icon">📈</span>
+                <div>
+                  <h4>Inteligentne analizy</h4>
+                  <p>Otrzymuj personalizowane raporty i rekomendacje finansowe</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

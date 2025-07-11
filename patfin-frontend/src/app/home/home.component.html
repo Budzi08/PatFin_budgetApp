@@ -1,0 +1,145 @@
+<div class="home-container">
+  <!-- Header/Navigation -->
+  <header class="main-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <h1>💰 PatFin</h1>
+          <span class="tagline">Zarządzaj swoimi finansami</span>
+        </div>
+        
+        <nav class="nav-buttons" *ngIf="!isLoggedIn()">
+          <button class="btn btn-outline" (click)="navigateToLogin()">
+            🔐 Zaloguj się
+          </button>
+          <button class="btn btn-primary" (click)="navigateToRegister()">
+            ✨ Załóż konto
+          </button>
+        </nav>
+
+        <nav class="nav-buttons" *ngIf="isLoggedIn()">
+          <div class="user-info">
+            <span class="welcome">Witaj, {{ getUserEmail() }}!</span>
+          </div>
+          <button class="btn btn-primary" (click)="navigateToTransactions()">
+            📊 Moje transakcje
+          </button>
+          <button class="btn btn-outline" (click)="logout()">
+            🚪 Wyloguj
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <h2 class="hero-title">
+          Przejmij kontrolę nad swoimi finansami
+        </h2>
+        <p class="hero-description">
+          PatFin to nowoczesna aplikacja do zarządzania finansami osobistymi. 
+          Śledź swoje wydatki, analizuj przychody i podejmuj mądre decyzje finansowe.
+        </p>
+        
+        <div class="hero-actions" *ngIf="!isLoggedIn()">
+          <button class="btn btn-primary btn-large" (click)="navigateToRegister()">
+            🚀 Rozpocznij za darmo
+          </button>
+          <button class="btn btn-outline btn-large" (click)="navigateToLogin()">
+            📱 Mam już konto
+          </button>
+        </div>
+
+        <div class="hero-actions" *ngIf="isLoggedIn()">
+          <button class="btn btn-primary btn-large" (click)="navigateToTransactions()">
+            📊 Przejdź do aplikacji
+          </button>
+        </div>
+      </div>
+      
+      <div class="hero-image">
+        <div class="mockup-card">
+          <div class="card-header">💰 Podsumowanie</div>
+          <div class="card-body">
+            <div class="stat-item">
+              <span class="stat-label">Przychody</span>
+              <span class="stat-value positive">+5,240 PLN</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Wydatki</span>
+              <span class="stat-value negative">-3,120 PLN</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Bilans</span>
+              <span class="stat-value positive">+2,120 PLN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h3 class="section-title">Funkcje aplikacji</h3>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h4>Śledzenie transakcji</h4>
+          <p>Dodawaj i kategoryzuj swoje przychody i wydatki. Miej pełną kontrolę nad swoim budżetem.</p>
+        </div>
+        
+        <div class="feature-card">
+          <h4>Statystyki i raporty</h4>
+          <p>Analizuj swoje wydatki za pomocą interaktywnych wykresów i szczegółowych raportów.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h4>Zaawansowane filtry</h4>
+          <p>Filtruj transakcje według daty, kwoty, kategorii i opisu. Znajdź dokładnie to czego szukasz.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h4>Kategorie</h4>
+          <p>Organizuj swoje transakcje za pomocą kategorii. Twórz własne lub korzystaj z domyślnych.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h4>Bezpieczeństwo</h4>
+          <p>Twoje dane są bezpieczne dzięki zaawansowanym mechanizmom uwierzytelniania.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h4>Responsywność</h4>
+          <p>Korzystaj z aplikacji na komputerze, tablecie lub smartfonie - wszędzie wygląda świetnie.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h4>💰 PatFin</h4>
+          <p>Zarządzanie finansami osobistymi</p>
+        </div>
+        
+        <div class="footer-info">
+          <p>&copy; 2025 PatFin. Wszystkie prawa zastrzeżone.</p>
+          <p>Aplikacja stworzona do zarządzania finansami osobistymi.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

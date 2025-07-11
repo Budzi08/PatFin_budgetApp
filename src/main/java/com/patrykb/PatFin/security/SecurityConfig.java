@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories").permitAll() // GET
                         .requestMatchers("/api/categories/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/statistics/**").authenticated() // Statystyki dla zalogowanych
+                        .requestMatchers("/api/transactions/**").authenticated() // Transakcje dla zalogowanych
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())

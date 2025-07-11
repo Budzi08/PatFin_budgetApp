@@ -1,31 +1,173 @@
-<h2>Twoje transakcje</h2>
+<div class="transactions-page">
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo" (click)="navigateToHome()">
+          <h1>💰 PatFin</h1>
+          <span class="tagline">Zarządzaj swoimi finansami</span>
+        </div>
+        
+        <nav class="nav-buttons">
+          <button class="btn btn-outline" (click)="navigateToHome()">
+            🏠 Strona główna
+          </button>
+          <button class="btn btn-danger" (click)="logout()">
+            🚪 Wyloguj się
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-<div class="action-buttons">
-  <button *ngIf="isAdmin" (click)="addCategory()">Dodaj kategorię</button>
-  <button (click)="viewStatistics()" class="stats-button">📊 Zobacz statystyki</button>
+  <div class="container">
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">💳 Twoje transakcje</h1>
+        <p class="page-subtitle">Zarządzaj swoimi finansami i analizuj wydatki</p>
+      </div>
+      
+      <div class="header-actions">
+        <button *ngIf="isAdmin" (click)="addCategory()" class="btn btn-admin">
+          <span class="icon">🏷️</span>
+          Dodaj kategorię
+        </button>
+        <button (click)="viewStatistics()" class="btn btn-stats">
+          <span class="icon">📊</span>
+          Zobacz statystyki
+        </button>
+        <button (click)="toggleFilters()" class="btn btn-filter">
+          <span class="icon">🔍</span>
+          {{ showFilters ? 'Ukryj filtry' : 'Pokaż filtry' }}
+        </button>
+      </div>
+    </div>
+
+  <!-- Panel filtrów -->
+  <div class="filters-section" *ngIf="showFilters">
+    <div class="filters-card">
+      <div class="card-header">
+        <h3 class="card-title">🔍 Filtry transakcji</h3>
+      </div>
+      <div class="card-body">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label for="startDate">📅 Data od:</label>
+            <input type="date" id="startDate" [(ngModel)]="filters.startDate" (change)="applyFilters()" class="form-input">
+          </div>
+          
+          <div class="filter-group">
+            <label for="endDate">📅 Data do:</label>
+            <input type="date" id="endDate" [(ngModel)]="filters.endDate" (change)="applyFilters()" class="form-input">
+          </div>
+          
+          <div class="filter-group">
+            <label for="minAmount">💰 Kwota od:</label>
+            <input type="number" id="minAmount" [(ngModel)]="filters.minAmount" (input)="applyFilters()" 
+                   step="0.01" placeholder="0.00 PLN" class="form-input">
+          </div>
+          
+          <div class="filter-group">
+            <label for="maxAmount">💰 Kwota do:</label>
+            <input type="number" id="maxAmount" [(ngModel)]="filters.maxAmount" (input)="applyFilters()" 
+                   step="0.01" placeholder="0.00 PLN" class="form-input">
+          </div>
+          
+          <div class="filter-group">
+            <label for="type">🔄 Typ:</label>
+            <select id="type" [(ngModel)]="filters.type" (change)="applyFilters()" class="form-select">
+              <option value="">Wszystkie typy</option>
+              <option value="INCOME">💚 Przychód</option>
+              <option value="EXPENSE">❤️ Wydatek</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="categoryId">🏷️ Kategoria:</label>
+            <select id="categoryId" [(ngModel)]="filters.categoryId" (change)="applyFilters()" class="form-select">
+              <option value="">Wszystkie kategorie</option>
+              <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="filter-actions" *ngIf="hasActiveFilters()">
+          <button (click)="clearFilters()" class="btn btn-secondary">
+            <span class="icon">🗑️</span>
+            Wyczyść filtry
+          </button>
+          <span class="active-filters-badge">✅ Filtry aktywne</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sekcja dodawania transakcji -->
+  <div class="add-transaction-section">
+    <app-transactions-add (ngsubmit)="onTransactionAdded()"></app-transactions-add>
+  </div>
+
+  <!-- Lista transakcji -->
+  <div class="transactions-section">
+    <div class="transactions-card" *ngIf="transactions().length > 0">
+      <div class="card-header">
+        <h3 class="card-title">📋 Lista transakcji ({{ transactions().length }})</h3>
+      </div>
+      <div class="card-body">
+        <div class="transactions-table-wrapper">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th class="th-date">📅 Data</th>
+                <th class="th-description">📝 Opis</th>
+                <th class="th-category">🏷️ Kategoria</th>
+                <th class="th-type">🔄 Typ</th>
+                <th class="th-amount">💰 Kwota</th>
+                <th class="th-actions">⚡ Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tx of transactions()" 
+                  [class.income-row]="tx.type === 'INCOME'" 
+                  [class.expense-row]="tx.type === 'EXPENSE'">
+                <td class="td-date">{{ tx.date | date:'dd/MM/yyyy' }}</td>
+                <td class="td-description">{{ tx.description }}</td>
+                <td class="td-category">
+                  <span class="category-badge" *ngIf="tx.category">{{ tx.category.name }}</span>
+                  <span class="no-category" *ngIf="!tx.category">Brak kategorii</span>
+                </td>
+                <td class="td-type">
+                  <span class="type-badge" [class.type-income]="tx.type === 'INCOME'" [class.type-expense]="tx.type === 'EXPENSE'">
+                    {{ tx.type === 'INCOME' ? '💚 Przychód' : '❤️ Wydatek' }}
+                  </span>
+                </td>
+                <td class="td-amount" [class.amount-positive]="tx.type === 'INCOME'" [class.amount-negative]="tx.type === 'EXPENSE'">
+                  {{ tx.amount | currency:'PLN':'symbol':'1.2-2' }}
+                </td>
+                <td class="td-actions">
+                  <button (click)="delete(tx.id)" class="btn btn-danger btn-sm" title="Usuń transakcję">
+                    <span class="icon">🗑️</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brak transakcji -->
+    <div class="no-transactions" *ngIf="transactions().length === 0">
+      <div class="no-transactions-card">
+        <div class="no-transactions-icon">📈</div>
+        <h3>Brak transakcji</h3>
+        <p>Nie masz jeszcze żadnych transakcji. Dodaj pierwszą transakcję, aby rozpocząć śledzenie swoich finansów!</p>
+        <button (click)="viewStatistics()" class="btn btn-stats">
+          <span class="icon">📊</span>
+          Zobacz statystyki
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
 </div>
-
-<app-transactions-add (ngsubmit)="onTransactionAdded()"></app-transactions-add>
-<table *ngIf="transactions().length > 0" border="1">
-  <thead>
-    <tr>
-      <th>Data</th>
-      <th>Opis</th>
-      <th>Kategoria</th>
-      <th>Typ</th>
-      <th>Kwota</th>
-      <th>Usuń</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let tx of transactions()">
-      <td>{{ tx.date | date }}</td>
-      <td>{{ tx.description }}</td>
-      <td>{{ tx.category?.name || '-' }}</td>
-      <td>{{ tx.type }}</td>
-      <td>{{ tx.amount }}</td>
-      <td><button (click)="delete(tx.id)">Usuń</button></td>
-    </tr>
-  </tbody>
-</table>
-<div *ngIf="transactions().length === 0">Brak transakcji</div>

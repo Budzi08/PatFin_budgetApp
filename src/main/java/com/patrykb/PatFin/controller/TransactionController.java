@@ -4,11 +4,15 @@ import com.patrykb.PatFin.dto.TransactionDto;
 import com.patrykb.PatFin.model.Transaction;
 import com.patrykb.PatFin.service.TransactionService;
 import com.patrykb.PatFin.service.UserService;
+import com.patrykb.PatFin.model.enums.TransactionType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.util.List;
+import java.time.LocalDate;
+import java.math.BigDecimal;
 import org.springframework.security.core.Authentication;
 import com.patrykb.PatFin.model.User;
 
@@ -37,6 +41,31 @@ public class TransactionController {
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
         return transactionService.save(dto, user);
+    }
+
+    @GetMapping("/filter")
+    public List<Transaction> getFilteredTransactions(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) Long categoryId) {
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userService.findByEmail(email);
+        
+        return transactionService.findAllByUserWithFilters(
+            user, startDate, endDate, minAmount, maxAmount, type, categoryId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTransaction(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userService.findByEmail(email);
+        transactionService.deleteById(id, user);
     }
 
 }
