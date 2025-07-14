@@ -10,7 +10,8 @@ import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.enums.TransactionType;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findAllByUser(User user);
+    @Query("SELECT t FROM Transaction t WHERE t.user = :user ORDER BY t.date DESC")
+    List<Transaction> findAllByUser(@Param("user") User user);
     
     // Statystyki per kategoria
     @Query("SELECT c.name, SUM(t.amount), COUNT(t) " +
@@ -36,7 +37,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.user = :user")
     Long countByUser(@Param("user") User user);
     
-    // Proste filtrowanie transakcji - bez null checks
+    // Proste filtrowanie transakcji
     @Query("SELECT t FROM Transaction t " +
            "WHERE t.user = :user " +
            "ORDER BY t.date DESC")

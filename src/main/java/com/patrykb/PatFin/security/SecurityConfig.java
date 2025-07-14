@@ -25,10 +25,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/categories").permitAll() // GET
+                        .requestMatchers("/api/categories").permitAll()
                         .requestMatchers("/api/categories/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/statistics/**").authenticated() // Statystyki dla zalogowanych
-                        .requestMatchers("/api/transactions/**").authenticated() // Transakcje dla zalogowanych
+                        .requestMatchers("/api/statistics/**").authenticated()
+                        .requestMatchers("/api/transactions/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())

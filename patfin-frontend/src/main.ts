@@ -4,7 +4,7 @@ import localePl from '@angular/common/locales/pl';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
 
-// Rejestruj polską lokalizację
+
 registerLocaleData(localePl);
 
 bootstrapApplication(App, appConfig)

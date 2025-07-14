@@ -32,7 +32,10 @@ public class TransactionService {
 
     public Transaction save(TransactionDto dto, User user) {
         Transaction transaction = new Transaction();
-        transaction.setAmount(dto.getAmount());
+        
+        BigDecimal amount = dto.getAmount().abs();
+        
+        transaction.setAmount(amount);
         transaction.setDescription(dto.getDescription());
         transaction.setDate(dto.getDate());
         transaction.setType(dto.getType());
@@ -47,11 +50,11 @@ public class TransactionService {
     public List<Transaction> findAllByUserWithFilters(User user, LocalDate startDate, LocalDate endDate,
                                                     BigDecimal minAmount, BigDecimal maxAmount,
                                                     TransactionType type, Long categoryId) {
-        // Pobierz wszystkie transakcje użytkownika (podstawowe query bez filtrów)
+
         List<Transaction> transactions = transactionRepository.findTransactionsWithFilters(
             user, startDate, endDate, minAmount, maxAmount, type, categoryId);
         
-        // Filtrowanie po stronie aplikacji
+
         return transactions.stream()
             .filter(t -> startDate == null || !t.getDate().isBefore(startDate))
             .filter(t -> endDate == null || !t.getDate().isAfter(endDate))
@@ -63,7 +66,6 @@ public class TransactionService {
     }
 
     public void deleteById(Long id, User user) {
-        // Sprawdzamy czy transakcja należy do użytkownika przed usunięciem
         Transaction transaction = transactionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Transaction not found"));
         

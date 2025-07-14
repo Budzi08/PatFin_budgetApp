@@ -42,7 +42,6 @@ export class Login {
         this.isLoading = false;
         console.log('Login error:', error);
         
-        // Sprawdzamy czy mamy błąd z backendu w formacie JSON
         if (error.error && error.error.message) {
           this.error = this.translateError(error.error.message);
         } else {

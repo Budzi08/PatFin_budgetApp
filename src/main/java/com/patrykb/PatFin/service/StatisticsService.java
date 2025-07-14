@@ -22,7 +22,6 @@ public class StatisticsService {
     public StatisticsDto.OverallStats getOverallStats(User user) {
         StatisticsDto.OverallStats stats = new StatisticsDto.OverallStats();
 
-        // Podstawowe sumy
         BigDecimal totalIncome = transactionRepository.findTotalAmountByUserAndType(user, TransactionType.INCOME);
         BigDecimal totalExpenses = transactionRepository.findTotalAmountByUserAndType(user, TransactionType.EXPENSE);
         

@@ -218,7 +218,6 @@
     }
   }
   
-  // Form specific button styles
   .btn.btn-outline {
     background: transparent;
     border: 2px solid #51cf66;
@@ -530,7 +529,6 @@
   }
 }
 
-// Card Animation
 .auth-card {
   animation: fadeInUp 0.6s ease-out;
   position: relative;
@@ -543,12 +541,10 @@
   z-index: 2;
 }
 
-// Focus animations
 .form-input:focus {
   animation: focusPulse 0.3s ease-out;
 }
 
-// Hover effects for auth card
 .auth-card {
   &:hover {
     transform: translateY(-4px);

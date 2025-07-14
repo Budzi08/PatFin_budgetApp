@@ -57,7 +57,6 @@
   }
 }
 
-// Stylizacja przycisków
 .btn {
   display: inline-flex;
   align-items: center;
@@ -299,7 +298,6 @@
   }
 }
 
-// Komórki tabeli
 .td-date {
   font-weight: 500;
   color: #6c757d;
@@ -357,7 +355,6 @@
   font-size: 16px;
 }
 
-// Brak transakcji
 .no-transactions {
   display: flex;
   justify-content: center;
@@ -391,7 +388,6 @@
   }
 }
 
-// Responsywność
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
@@ -479,7 +475,6 @@
   }
 }
 
-// Animacje
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -495,7 +490,6 @@
   animation: fadeIn 0.5s ease-out;
 }
 
-// Hover effects dla tabeli
 .transactions-table tbody tr {
   &:hover {
     .btn-danger {

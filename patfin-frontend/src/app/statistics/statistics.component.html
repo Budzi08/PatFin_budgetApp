@@ -1,5 +1,4 @@
 <div class="statistics-container">
-  <!-- Main Header -->
   <header class="main-header">
     <div class="container">
       <div class="header-content">
@@ -35,6 +34,71 @@
           <span class="icon">🔄</span>
           Odśwież
         </button>
+      </div>
+    </div>
+
+    <div class="filters-section">
+      <h3>📅 Okres statystyk</h3>
+      <div class="filter-options">
+        <div class="quick-filters">
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === 'all'" 
+            (click)="setPeriod('all')">
+            Wszystkie
+          </button>
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === '1month'" 
+            (click)="setPeriod('1month')">
+            1 miesiąc
+          </button>
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === '3months'" 
+            (click)="setPeriod('3months')">
+            3 miesiące
+          </button>
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === '6months'" 
+            (click)="setPeriod('6months')">
+            6 miesięcy
+          </button>
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === '1year'" 
+            (click)="setPeriod('1year')">
+            1 rok
+          </button>
+          <button 
+            class="btn btn-filter" 
+            [class.active]="selectedPeriod === 'custom'" 
+            (click)="setPeriod('custom')">
+            Własny
+          </button>
+        </div>
+        
+        <div *ngIf="selectedPeriod === 'custom'" class="custom-date-range">
+          <div class="date-inputs">
+            <div class="input-group">
+              <label for="startDate">📅 Data od:</label>
+              <input 
+                type="date" 
+                id="startDate" 
+                [(ngModel)]="customStartDate" 
+                (change)="applyCustomDateRange()">
+            </div>
+            <div class="input-group">
+              <label for="endDate">📅 Data do:</label>
+              <input 
+                type="date" 
+                id="endDate" 
+                [(ngModel)]="customEndDate" 
+                (change)="applyCustomDateRange()">
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

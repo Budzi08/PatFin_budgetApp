@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TransactionsService } from '../transactions.service';
 import { CategoriesService, Category } from '../../categories/categories';
@@ -13,6 +13,8 @@ import { CategoriesService, Category } from '../../categories/categories';
 export class TransactionsAdd {
   private service = inject(TransactionsService);
   private categoriesService = inject(CategoriesService);
+
+  @Output() transactionAdded = new EventEmitter<void>();
 
   categories = signal<Category[]>([]);
 
@@ -48,6 +50,12 @@ export class TransactionsAdd {
         this.date = '';
         this.type = 'EXPENSE';
         this.categoryId = 1;
+        
+        this.transactionAdded.emit();
+        
+        setTimeout(() => {
+          this.success = false;
+        }, 3000);
       },
       error: () => {
         this.success = false;

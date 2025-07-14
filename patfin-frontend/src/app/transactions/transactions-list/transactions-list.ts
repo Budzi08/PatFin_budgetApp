@@ -21,7 +21,6 @@ export class TransactionsList {
   categories = signal<Category[]>([]);
   isAdmin = false;
   
-  // Filtry
   filters: TransactionFilter = {};
   showFilters = false;
 
@@ -56,7 +55,7 @@ export class TransactionsList {
         error: (err: any) => console.error('Błąd podczas filtrowania transakcji:', err)
       });
     } else {
-      this.refresh(); // Użyj standardowego endpointu jeśli brak filtrów
+      this.refresh();
     }
   }
 
@@ -96,5 +95,12 @@ export class TransactionsList {
   logout() {
     this.auth.logout();
     this.router.navigate(['/']);
+  }
+  
+  getDisplayAmount(transaction: Transaction): number {
+    if (transaction.type === 'EXPENSE') {
+      return -Math.abs(transaction.amount);
+    }
+    return Math.abs(transaction.amount);
   }
 }

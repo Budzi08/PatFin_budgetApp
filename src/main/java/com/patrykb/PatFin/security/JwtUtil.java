@@ -28,7 +28,6 @@ public class JwtUtil {
     }
 
     public boolean extractIsAdmin(String token) {
-        // domyślnie false, jeśli nie ma
         Object val = getAllClaims(token).get("isAdmin");
         return val instanceof Boolean ? (Boolean)val : Boolean.parseBoolean(String.valueOf(val));
     }

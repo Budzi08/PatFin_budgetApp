@@ -50,11 +50,9 @@ export class Register {
         if (error.status === 0) {
           this.error = 'Brak połączenia z serwerem. Sprawdź czy backend jest uruchomiony.';
         } else if (error.error && error.error.error) {
-          // Tłumaczenie błędów z backend na polski
           const backendError = error.error.error;
           this.error = this.translateError(backendError);
         } else if (error.error && typeof error.error === 'string') {
-          // Tłumaczenie dla błędów w formacie string
           this.error = this.translateError(error.error);
         } else if (error.message) {
           this.error = error.message;
@@ -71,7 +69,6 @@ export class Register {
            this.confirmPassword.length > 0;
   }
 
-  // Funkcja do tłumaczenia błędów z backend na polski
   private translateError(errorMessage: string): string {
     const translations: {[key: string]: string} = {
       'Email already exists': 'Użytkownik z tym adresem email już istnieje. Spróbuj się zalogować lub użyj innego adresu.',

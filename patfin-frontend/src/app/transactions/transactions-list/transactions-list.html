@@ -1,5 +1,4 @@
 <div class="transactions-page">
-  <!-- Main Header -->
   <header class="main-header">
     <div class="container">
       <div class="header-content">
@@ -43,7 +42,6 @@
       </div>
     </div>
 
-  <!-- Panel filtrów -->
   <div class="filters-section" *ngIf="showFilters">
     <div class="filters-card">
       <div class="card-header">
@@ -102,12 +100,10 @@
     </div>
   </div>
 
-  <!-- Sekcja dodawania transakcji -->
   <div class="add-transaction-section">
-    <app-transactions-add (ngsubmit)="onTransactionAdded()"></app-transactions-add>
+    <app-transactions-add (transactionAdded)="onTransactionAdded()"></app-transactions-add>
   </div>
 
-  <!-- Lista transakcji -->
   <div class="transactions-section">
     <div class="transactions-card" *ngIf="transactions().length > 0">
       <div class="card-header">
@@ -142,7 +138,7 @@
                   </span>
                 </td>
                 <td class="td-amount" [class.amount-positive]="tx.type === 'INCOME'" [class.amount-negative]="tx.type === 'EXPENSE'">
-                  {{ tx.amount | currency:'PLN':'symbol':'1.2-2' }}
+                  {{ getDisplayAmount(tx) | currency:'PLN':'symbol':'1.2-2' }}
                 </td>
                 <td class="td-actions">
                   <button (click)="delete(tx.id)" class="btn btn-danger btn-sm" title="Usuń transakcję">
@@ -156,7 +152,6 @@
       </div>
     </div>
 
-    <!-- Brak transakcji -->
     <div class="no-transactions" *ngIf="transactions().length === 0">
       <div class="no-transactions-card">
         <div class="no-transactions-icon">📈</div>

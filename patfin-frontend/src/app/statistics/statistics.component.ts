@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StatisticsService, OverallStats, CategoryStats, MonthlyStats } from './statistics.service';
 import { BaseChartDirective } from 'ng2-charts';
@@ -13,7 +14,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-statistics',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, BaseChartDirective],
   templateUrl: './statistics.component.html',
   styleUrls: ['./statistics.component.scss']
 })
@@ -23,6 +24,11 @@ export class StatisticsComponent implements OnInit {
   monthlyStats: MonthlyStats[] = [];
   loading = true;
   error: string | null = null;
+
+  // Filtry czasowe
+  selectedPeriod: string = 'all';
+  customStartDate: string = '';
+  customEndDate: string = '';
 
   // Konfiguracja wykresu kołowego
   public pieChartType: ChartType = 'pie';
@@ -126,16 +132,47 @@ export class StatisticsComponent implements OnInit {
     this.error = null;
 
     try {
-      const [overall, expenses, monthly] = await Promise.all([
-        firstValueFrom(this.statisticsService.getOverallStats()),
-        firstValueFrom(this.statisticsService.getCategoryStats('EXPENSE')),
-        firstValueFrom(this.statisticsService.getMonthlyStats())
+      const filterParams = this.buildFilterParams();
+      
+      const [summaryData, monthlyData, categoryData] = await Promise.all([
+        firstValueFrom(this.statisticsService.getSummary(filterParams)),
+        firstValueFrom(this.statisticsService.getMonthlySummary(filterParams)),
+        firstValueFrom(this.statisticsService.getByCategory(filterParams))
       ]);
 
-      this.overallStats = overall || null;
-      this.categoryExpenses = expenses || [];
-      this.monthlyStats = monthly || [];
-      
+      this.overallStats = {
+        totalIncome: summaryData.income || 0,
+        totalExpenses: summaryData.expense || 0,
+        currentBalance: summaryData.balance || 0,
+        totalTransactions: summaryData.totalTransactions || 0,
+        expensesByCategory: [],
+        incomeByCategory: [],
+        monthlyStats: []
+      };
+
+      this.categoryExpenses = Object.keys(categoryData)
+        .filter(category => categoryData[category].expense > 0)
+        .map(category => ({
+          categoryName: category,
+          totalAmount: categoryData[category].expense || 0,
+          transactionCount: 1
+        }));
+
+      this.monthlyStats = Object.keys(monthlyData).map(month => {
+        const data = monthlyData[month];
+        const [year, monthNum] = month.split('-').map(Number);
+        return {
+          year,
+          month: monthNum,
+          totalIncome: data.income || 0,
+          totalExpenses: data.expense || 0,
+          balance: (data.income || 0) - (data.expense || 0)
+        };
+      }).sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return b.month - a.month;
+      });
+
       this.updateCharts();
       this.loading = false;
     } catch (error) {
@@ -223,5 +260,33 @@ export class StatisticsComponent implements OnInit {
   logout() {
     this.auth.logout();
     this.router.navigate(['/']);
+  }
+
+  setPeriod(period: string) {
+    this.selectedPeriod = period;
+    if (period !== 'custom') {
+      this.loadStatistics();
+    }
+  }
+
+  applyCustomDateRange() {
+    if (this.customStartDate && this.customEndDate) {
+      this.loadStatistics();
+    }
+  }
+
+  private buildFilterParams(): any {
+    const params: any = {};
+    
+    if (this.selectedPeriod === 'custom') {
+      if (this.customStartDate && this.customEndDate) {
+        params.startDate = this.customStartDate;
+        params.endDate = this.customEndDate;
+      }
+    } else if (this.selectedPeriod !== 'all') {
+      params.period = this.selectedPeriod;
+    }
+    
+    return params;
   }
 }

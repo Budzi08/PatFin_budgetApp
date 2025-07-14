@@ -46,16 +46,21 @@ export class StatisticsService {
     return this.http.get<MonthlyStats[]>(`${this.apiUrl}/monthly-detailed`);
   }
 
-  // Stare endpoint'y dla kompatybilności
-  getSummary(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/summary`);
+  getSummary(params?: any): Observable<any> {
+    const queryParams = params ? new URLSearchParams(params).toString() : '';
+    const url = queryParams ? `${this.apiUrl}/summary?${queryParams}` : `${this.apiUrl}/summary`;
+    return this.http.get(url);
   }
 
-  getMonthlySummary(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/monthly`);
+  getMonthlySummary(params?: any): Observable<any> {
+    const queryParams = params ? new URLSearchParams(params).toString() : '';
+    const url = queryParams ? `${this.apiUrl}/monthly?${queryParams}` : `${this.apiUrl}/monthly`;
+    return this.http.get(url);
   }
 
-  getByCategory(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/by-category`);
+  getByCategory(params?: any): Observable<any> {
+    const queryParams = params ? new URLSearchParams(params).toString() : '';
+    const url = queryParams ? `${this.apiUrl}/by-category?${queryParams}` : `${this.apiUrl}/by-category`;
+    return this.http.get(url);
   }
 }
