@@ -8,10 +8,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat&logo=openjdk)](https://openjdk.org/)
 
-## 🚀 Demo
-
-🌐 **[Obejrzyj live demo](https://patfin-demo.vercel.app)** *(jeśli dostępne)*
-
 ## 📖 Opis
 
 PatFin to kompletna aplikacja full-stack do zarządzania finansami osobistymi, która pomaga użytkownikom śledzić wydatki, analizować przychody i podejmować mądre decyzje finansowe. Aplikacja oferuje intuicyjny interfejs, zaawansowane statystyki oraz bezpieczne przechowywanie danych.
@@ -29,7 +25,7 @@ PatFin to kompletna aplikacja full-stack do zarządzania finansami osobistymi, k
 - Kategoryzacja transakcji
 - Zaawansowane filtry (data, kwota, kategoria, typ)
 - Sortowanie i wyszukiwanie
-- Edycja i usuwanie transakcji
+- Usuwanie transakcji
 
 ### 📊 **Statystyki i Raporty**
 - Interaktywne wykresy (Chart.js)
@@ -129,8 +125,11 @@ categories 1:N transactions
 ## 📱 Zrzuty Ekranu
 
 ### Strona Główna
+<img width="1384" height="1307" alt="image" src="https://github.com/user-attachments/assets/cc0394ad-c755-4c5f-b021-f35e6ec8ec2d" />
 
 ### Dashboard Transakcji
+<img width="1332" height="1304" alt="image" src="https://github.com/user-attachments/assets/21e2eec5-9f22-4ba5-ab2e-f56f8457c629" />
 
 ### Statystyki
+<img width="1309" height="1309" alt="image" src="https://github.com/user-attachments/assets/806c323b-692a-4346-9820-017527a0aea4" />
 
