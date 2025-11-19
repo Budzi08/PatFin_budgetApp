@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { StatisticsService } from '../statistics/statistics.service';
+import { FontSizeService } from '../core/font-size.service';
+import { ThemeService } from '../core/theme.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -20,10 +22,14 @@ export class HomeComponent implements OnInit {
     loading: false
   };
   
+  showThemeDropdown = false;
+  
   constructor(
     private router: Router, 
     private authService: AuthService,
-    private statisticsService: StatisticsService
+    private statisticsService: StatisticsService,
+    public fontSizeService: FontSizeService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {
@@ -65,6 +71,15 @@ export class HomeComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 
   getUserEmail(): string {

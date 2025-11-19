@@ -1,13 +1,13 @@
 .add-transaction-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4px 6px var(--shadow);
   overflow: hidden;
   margin-bottom: 24px;
 }
 
 .card-header {
-  background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
   color: white;
   padding: 16px 20px;
   
@@ -37,8 +37,8 @@
     label {
       margin-bottom: 6px;
       font-weight: 600;
-      color: #2c3e50;
-      font-size: 14px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
     }
   }
   
@@ -50,24 +50,24 @@
 
 .form-input, .form-select {
   padding: 12px 16px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   transition: all 0.3s ease;
-  background: white;
+  background: var(--bg-card);
   
   &:focus {
     outline: none;
-    border-color: #51cf66;
-    box-shadow: 0 0 0 3px rgba(81, 207, 102, 0.1);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-shadow-light);
   }
   
   &::placeholder {
-    color: #adb5bd;
+    color: var(--text-secondary);
   }
   
   &:invalid {
-    border-color: #ff6b6b;
+    border-color: var(--error-color);
   }
 }
 
@@ -78,7 +78,7 @@
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -86,7 +86,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   
   .icon {
-    font-size: 16px;
+    font-size: 1rem;
   }
   
   &:hover:not(:disabled) {
@@ -101,33 +101,34 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    background: #adb5bd !important;
+    background: var(--text-secondary) !important;
   }
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
   color: white;
   
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #47cc5a 0%, #3bb04b 100%);
+    background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+    opacity: 0.95;
   }
 }
 
 .btn-submit {
   width: 100%;
   padding: 14px 24px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .success-message {
   margin-top: 16px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  color: #155724;
+  background: var(--bg-secondary);
+  color: var(--success-color);
   border-radius: 8px;
-  border: 1px solid #c3e6cb;
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -135,7 +136,7 @@
   animation: fadeInSuccess 0.5s ease-out;
   
   .success-icon {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 }
 
@@ -167,6 +168,6 @@
   
   .btn-submit {
     padding: 12px 20px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 }

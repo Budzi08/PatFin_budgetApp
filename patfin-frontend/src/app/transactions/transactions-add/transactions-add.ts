@@ -3,6 +3,8 @@ import { Component, inject, signal, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TransactionsService } from '../transactions.service';
 import { CategoriesService, Category } from '../../categories/categories';
+import { ThemeService } from '../../core/theme.service';
+import { FontSizeService } from '../../core/font-size.service';
 
 @Component({
   selector: 'app-transactions-add',
@@ -13,6 +15,8 @@ import { CategoriesService, Category } from '../../categories/categories';
 export class TransactionsAdd {
   private service = inject(TransactionsService);
   private categoriesService = inject(CategoriesService);
+  public themeService = inject(ThemeService);
+  public fontSizeService = inject(FontSizeService);
 
   @Output() transactionAdded = new EventEmitter<void>();
 
@@ -24,6 +28,7 @@ export class TransactionsAdd {
   type: string = 'EXPENSE';
   categoryId: number | null = null;
   success = false;
+  showThemeDropdown = false;
 
   constructor() {
     this.categoriesService.getAll().subscribe({
@@ -62,5 +67,14 @@ export class TransactionsAdd {
         console.error('Błąd podczas dodawania transakcji');
       }
     });
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 }

@@ -1,6 +1,6 @@
 .statistics-container {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
 }
 
 // Container
@@ -12,8 +12,8 @@
 
 // Main Header
 .main-header {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: var(--bg-card);
+  box-shadow: 0 2px 10px var(--shadow);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -39,12 +39,12 @@
       margin: 0;
       font-size: 1.8rem;
       font-weight: 700;
-      color: #2c3e50;
+      color: var(--text-primary);
     }
     
     .tagline {
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--text-secondary);
       margin-top: -4px;
     }
   }
@@ -71,26 +71,26 @@
   justify-content: center;
   gap: 0.5rem;
   
-  &.btn-outline {
+  .btn-outline {
     background: transparent;
-    border: 2px solid #51cf66;
-    color: #51cf66;
+    border: 2px solid var(--accent-primary);
+    color: var(--accent-primary);
     
     &:hover {
-      background: #51cf66;
+      background: var(--accent-primary);
       color: white;
       transform: translateY(-2px);
     }
   }
   
   &.btn-danger {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    background: linear-gradient(135deg, var(--filter-expense-start) 0%, var(--filter-expense-end) 100%);
     color: white;
     
     &:hover {
-      background: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
+      background: linear-gradient(135deg, var(--filter-expense-start) 0%, var(--filter-expense-end) 100%);
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+      opacity: 0.9;
     }
   }
 }
@@ -102,21 +102,21 @@
   margin-bottom: 30px;
   
   h2 {
-    color: #333;
+    color: var(--text-primary);
     margin: 0;
   }
   
   .refresh-btn {
-    background-color: #28a745;
+    background-color: var(--success-color, #28a745);
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 0.875rem;
     
     &:hover {
-      background-color: #218838;
+      background-color: var(--success-color-dark);
     }
   }
 }
@@ -124,13 +124,13 @@
 .loading, .error {
   text-align: center;
   padding: 40px;
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .error {
-  color: #dc3545;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+  color: var(--error-color, #dc3545);
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
   border-radius: 5px;
 }
 
@@ -142,46 +142,46 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 25px;
   border-radius: 10px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid #ccc;
+  box-shadow: 0 4px 6px var(--shadow);
+  border-left: 5px solid var(--border-color);
   
   h3 {
     margin: 0 0 15px 0;
-    color: #666;
-    font-size: 16px;
+    color: var(--text-secondary);
+    font-size: 1rem;
     font-weight: 500;
   }
   
   .amount {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: bold;
     margin: 0;
   }
   
   &.income {
-    border-left-color: #4CAF50;
-    .amount { color: #4CAF50; }
+    border-left-color: var(--success-color);
+    .amount { color: var(--success-color); }
   }
   
-  &.expenses {
-    border-left-color: #F44336;
-    .amount { color: #F44336; }
+  &.expense {
+    border-left-color: var(--error-color);
+    .amount { color: var(--error-color); }
   }
   
   &.balance {
-    border-left-color: #2196F3;
+    border-left-color: var(--info-color);
     
-    &.positive .amount { color: #4CAF50; }
-    &.negative .amount { color: #F44336; }
+    &.positive .amount { color: var(--success-color); }
+    &.negative .amount { color: var(--error-color); }
   }
   
   &.transactions {
-    border-left-color: #FF9800;
-    .amount { color: #FF9800; }
+    border-left-color: var(--warning-color);
+    .amount { color: var(--warning-color); }
   }
 }
 
@@ -192,14 +192,14 @@
 }
 
 .chart-container {
-  background: white;
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 25px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--shadow);
   
   h3 {
     margin: 0 0 20px 0;
-    color: #333;
+    color: var(--text-primary);
     text-align: center;
   }
 }
@@ -231,22 +231,22 @@
     }
     
     th {
-      background-color: #f8f9fa;
+      background-color: var(--bg-secondary);
       font-weight: bold;
-      color: #333;
+      color: var(--text-primary);
     }
     
     tr:hover {
-      background-color: #f5f5f5;
+      background-color: var(--bg-secondary);
     }
     
     .positive {
-      color: #4CAF50;
+      color: var(--success-color);
       font-weight: bold;
     }
     
     .negative {
-      color: #F44336;
+      color: var(--error-color);
       font-weight: bold;
     }
   }
@@ -255,10 +255,10 @@
 .no-data {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--text-secondary);
   
   p {
-    font-size: 18px;
+    font-size: 1.125rem;
     margin: 10px 0;
   }
 }
@@ -271,24 +271,24 @@
   margin: 30px 0;
   flex-wrap: wrap;
   gap: 20px;
-  background: white;
+  background: var(--bg-card);
   padding: 40px 0;
   margin-bottom: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px var(--shadow);
 }
 
 .header-content {
   .page-title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin: 0 0 5px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    text-shadow: 2px 2px 4px var(--shadow);
   }
   
   .page-subtitle {
     font-size: 1.1rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
     margin: 0;
     font-weight: 400;
   }
@@ -306,13 +306,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
   color: white;
   
   &:hover {
-    background: linear-gradient(135deg, #47c05b 0%, #37a049 100%);
+    background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(81, 207, 102, 0.3);
+    box-shadow: 0 8px 20px var(--accent-shadow-medium);
+    opacity: 0.95;
   }
 }
 
@@ -352,9 +353,9 @@
 
 // Filtry czasowe
 .filters-section {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px var(--shadow-hover);
   padding: 24px;
   margin-bottom: 32px;
   
@@ -362,7 +363,7 @@
     margin: 0 0 20px 0;
     font-size: 1.2rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -382,23 +383,23 @@
   
   .btn-filter {
     padding: 10px 20px;
-    border: 2px solid #e9ecef;
-    background: white;
-    color: #6c757d;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
     border-radius: 8px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     
     &:hover {
-      border-color: #51cf66;
-      color: #51cf66;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
       transform: translateY(-2px);
     }
     
     &.active {
-      background: #51cf66;
-      border-color: #51cf66;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
   }
@@ -419,20 +420,20 @@
         
         label {
           font-weight: 500;
-          color: #495057;
+          color: var(--text-secondary);
           font-size: 0.9rem;
         }
         
         input[type="date"] {
           padding: 12px;
-          border: 2px solid #e9ecef;
+          border: 2px solid var(--border-color);
           border-radius: 8px;
           font-size: 1rem;
           transition: border-color 0.3s ease;
           
           &:focus {
             outline: none;
-            border-color: #51cf66;
+            border-color: var(--accent-primary);
           }
         }
       }

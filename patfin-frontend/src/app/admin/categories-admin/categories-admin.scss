@@ -1,0 +1,12 @@
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

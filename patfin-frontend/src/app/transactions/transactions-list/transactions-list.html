@@ -3,16 +3,44 @@
     <div class="container">
       <div class="header-content">
         <div class="logo" (click)="navigateToHome()">
-          <h1>💰 PatFin</h1>
+          <h1><span role="img" aria-label="Ikona pieniędzy">💰</span> PatFin</h1>
           <span class="tagline">Zarządzaj swoimi finansami</span>
         </div>
         
         <nav class="nav-buttons">
+          <div class="theme-controls">
+            <button 
+              class="theme-toggle-button"
+              [attr.aria-label]="'Zmień motyw'"
+              [title]="'Wybierz motyw'"
+              (click)="toggleThemeDropdown()">
+              🎨
+            </button>
+            <div class="theme-dropdown" *ngIf="showThemeDropdown">
+              <button 
+                *ngFor="let theme of themeService.themes"
+                class="theme-option"
+                [class.active]="themeService.getCurrentTheme() === theme.id"
+                [attr.aria-label]="theme.name + ': ' + theme.description"
+                (click)="selectTheme(theme.id)">
+                <span class="theme-icon">{{ theme.icon }}</span>
+                <span class="theme-name">{{ theme.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-controls">
+            <button class="btn-icon" aria-label="Zmniejsz czcionkę" title="A-" (click)="fontSizeService.decrease()">
+              A-
+            </button>
+            <button class="btn-icon" aria-label="Zwiększ czcionkę" title="A+" (click)="fontSizeService.increase()">
+              A+
+            </button>
+          </div>
           <button class="btn btn-outline" (click)="navigateToHome()">
-            🏠 Strona główna
+            <span role="img" aria-label="Ikona domu">🏠</span> Strona główna
           </button>
           <button class="btn btn-danger" (click)="logout()">
-            🚪 Wyloguj się
+            <span role="img" aria-label="Ikona drzwi">🚪</span> Wyloguj się
           </button>
         </nav>
       </div>
@@ -22,21 +50,21 @@
   <div class="container">
     <div class="page-header">
       <div class="header-content">
-        <h1 class="page-title">💳 Twoje transakcje</h1>
+        <h1 class="page-title"><span role="img" aria-label="Ikona karty kredytowej">💳</span> Twoje transakcje</h1>
         <p class="page-subtitle">Zarządzaj swoimi finansami i analizuj wydatki</p>
       </div>
       
       <div class="header-actions">
         <button *ngIf="isAdmin" (click)="addCategory()" class="btn btn-admin">
-          <span class="icon">🏷️</span>
+          <span class="icon" role="img" aria-label="Ikona etykiety">🏷️</span>
           Dodaj kategorię
         </button>
         <button (click)="viewStatistics()" class="btn btn-stats">
-          <span class="icon">📊</span>
+          <span class="icon" role="img" aria-label="Ikona wykresów">📊</span>
           Zobacz statystyki
         </button>
         <button (click)="toggleFilters()" class="btn btn-filter">
-          <span class="icon">🔍</span>
+          <span class="icon" role="img" aria-label="Ikona lupy">🔍</span>
           {{ showFilters ? 'Ukryj filtry' : 'Pokaż filtry' }}
         </button>
       </div>
@@ -45,34 +73,34 @@
   <div class="filters-section" *ngIf="showFilters">
     <div class="filters-card">
       <div class="card-header">
-        <h3 class="card-title">🔍 Filtry transakcji</h3>
+        <h3 class="card-title"><span role="img" aria-label="Ikona lupy">🔍</span> Filtry transakcji</h3>
       </div>
       <div class="card-body">
         <div class="filters-grid">
           <div class="filter-group">
-            <label for="startDate">📅 Data od:</label>
+            <label for="startDate"><span role="img" aria-label="Ikona kalendarza">📅</span> Data od:</label>
             <input type="date" id="startDate" [(ngModel)]="filters.startDate" (change)="applyFilters()" class="form-input">
           </div>
           
           <div class="filter-group">
-            <label for="endDate">📅 Data do:</label>
+            <label for="endDate"><span role="img" aria-label="Ikona kalendarza">📅</span> Data do:</label>
             <input type="date" id="endDate" [(ngModel)]="filters.endDate" (change)="applyFilters()" class="form-input">
           </div>
           
           <div class="filter-group">
-            <label for="minAmount">💰 Kwota od:</label>
+            <label for="minAmount"><span role="img" aria-label="Ikona pieniędzy">💰</span> Kwota od:</label>
             <input type="number" id="minAmount" [(ngModel)]="filters.minAmount" (input)="applyFilters()" 
                    step="0.01" placeholder="0.00 PLN" class="form-input">
           </div>
           
           <div class="filter-group">
-            <label for="maxAmount">💰 Kwota do:</label>
+            <label for="maxAmount"><span role="img" aria-label="Ikona pieniędzy">💰</span> Kwota do:</label>
             <input type="number" id="maxAmount" [(ngModel)]="filters.maxAmount" (input)="applyFilters()" 
                    step="0.01" placeholder="0.00 PLN" class="form-input">
           </div>
           
           <div class="filter-group">
-            <label for="type">🔄 Typ:</label>
+            <label for="type"><span role="img" aria-label="Ikona strzałek">🔄</span> Typ:</label>
             <select id="type" [(ngModel)]="filters.type" (change)="applyFilters()" class="form-select">
               <option value="">Wszystkie typy</option>
               <option value="INCOME">💚 Przychód</option>
@@ -81,7 +109,7 @@
           </div>
           
           <div class="filter-group">
-            <label for="categoryId">🏷️ Kategoria:</label>
+            <label for="categoryId"><span role="img" aria-label="Ikona etykiety">🏷️</span> Kategoria:</label>
             <select id="categoryId" [(ngModel)]="filters.categoryId" (change)="applyFilters()" class="form-select">
               <option value="">Wszystkie kategorie</option>
               <option *ngFor="let category of categories()" [value]="category.id">{{ category.name }}</option>
@@ -90,11 +118,11 @@
         </div>
         
         <div class="filter-actions" *ngIf="hasActiveFilters()">
-          <button (click)="clearFilters()" class="btn btn-secondary">
-            <span class="icon">🗑️</span>
+          <button (click)="clearFilters()" class="btn btn-clear" aria-label="Wyczyść wszystkie filtry">
+            <span class="icon" role="img" aria-label="Ikona kosza">🗑️</span>
             Wyczyść filtry
           </button>
-          <span class="active-filters-badge">✅ Filtry aktywne</span>
+          <span class="active-filters-badge"><span role="img" aria-label="Ikona ptaszka">✅</span> Filtry aktywne</span>
         </div>
       </div>
     </div>
@@ -107,19 +135,19 @@
   <div class="transactions-section">
     <div class="transactions-card" *ngIf="transactions().length > 0">
       <div class="card-header">
-        <h3 class="card-title">📋 Lista transakcji ({{ transactions().length }})</h3>
+        <h3 class="card-title"><span role="img" aria-label="Ikona schowka">📋</span> Lista transakcji ({{ transactions().length }})</h3>
       </div>
       <div class="card-body">
         <div class="transactions-table-wrapper">
           <table class="transactions-table">
             <thead>
               <tr>
-                <th class="th-date">📅 Data</th>
-                <th class="th-description">📝 Opis</th>
-                <th class="th-category">🏷️ Kategoria</th>
-                <th class="th-type">🔄 Typ</th>
-                <th class="th-amount">💰 Kwota</th>
-                <th class="th-actions">⚡ Akcje</th>
+                <th class="th-date"><span role="img" aria-label="Ikona kalendarza">📅</span> Data</th>
+                <th class="th-description"><span role="img" aria-label="Ikona notatki">📝</span> Opis</th>
+                <th class="th-category"><span role="img" aria-label="Ikona etykiety">🏷️</span> Kategoria</th>
+                <th class="th-type"><span role="img" aria-label="Ikona strzałek">🔄</span> Typ</th>
+                <th class="th-amount"><span role="img" aria-label="Ikona pieniędzy">💰</span> Kwota</th>
+                <th class="th-actions"><span role="img" aria-label="Ikona błyskawicy">⚡</span> Akcje</th>
               </tr>
             </thead>
             <tbody>
@@ -134,7 +162,9 @@
                 </td>
                 <td class="td-type">
                   <span class="type-badge" [class.type-income]="tx.type === 'INCOME'" [class.type-expense]="tx.type === 'EXPENSE'">
-                    {{ tx.type === 'INCOME' ? '💚 Przychód' : '❤️ Wydatek' }}
+                    <span *ngIf="tx.type === 'INCOME'" role="img" aria-label="Zielone serce">💚</span>
+                    <span *ngIf="tx.type === 'EXPENSE'" role="img" aria-label="Czerwone serce">❤️</span>
+                    {{ tx.type === 'INCOME' ? ' Przychód' : ' Wydatek' }}
                   </span>
                 </td>
                 <td class="td-amount" [class.amount-positive]="tx.type === 'INCOME'" [class.amount-negative]="tx.type === 'EXPENSE'">
@@ -142,7 +172,7 @@
                 </td>
                 <td class="td-actions">
                   <button (click)="delete(tx.id)" class="btn btn-danger btn-sm" title="Usuń transakcję">
-                    <span class="icon">🗑️</span>
+                    <span class="icon" role="img" aria-label="Ikona kosza">🗑️</span>
                   </button>
                 </td>
               </tr>
@@ -154,11 +184,11 @@
 
     <div class="no-transactions" *ngIf="transactions().length === 0">
       <div class="no-transactions-card">
-        <div class="no-transactions-icon">📈</div>
+        <div class="no-transactions-icon" role="img" aria-label="Ikona wykresu wzrostowego">📈</div>
         <h3>Brak transakcji</h3>
         <p>Nie masz jeszcze żadnych transakcji. Dodaj pierwszą transakcję, aby rozpocząć śledzenie swoich finansów!</p>
         <button (click)="viewStatistics()" class="btn btn-stats">
-          <span class="icon">📊</span>
+          <span class="icon" role="img" aria-label="Ikona wykresów">📊</span>
           Zobacz statystyki
         </button>
       </div>

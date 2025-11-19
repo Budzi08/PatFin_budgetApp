@@ -3,19 +3,47 @@
     <div class="container">
       <div class="header-content">
         <div class="logo" (click)="navigateToHome()">
-          <h1>💰 PatFin</h1>
+          <h1><span role="img" aria-label="Ikona pieniędzy">💰</span> PatFin</h1>
           <span class="tagline">Zarządzaj swoimi finansami</span>
         </div>
         
         <nav class="nav-buttons">
+          <div class="theme-controls">
+            <button 
+              class="theme-toggle-button"
+              [attr.aria-label]="'Zmień motyw'"
+              [title]="'Wybierz motyw'"
+              (click)="toggleThemeDropdown()">
+              🎨
+            </button>
+            <div class="theme-dropdown" *ngIf="showThemeDropdown">
+              <button 
+                *ngFor="let theme of themeService.themes"
+                class="theme-option"
+                [class.active]="themeService.getCurrentTheme() === theme.id"
+                [attr.aria-label]="theme.name + ': ' + theme.description"
+                (click)="selectTheme(theme.id)">
+                <span class="theme-icon">{{ theme.icon }}</span>
+                <span class="theme-name">{{ theme.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-controls">
+            <button class="btn-icon" aria-label="Zmniejsz czcionkę" title="A-" (click)="fontSizeService.decrease()">
+              A-
+            </button>
+            <button class="btn-icon" aria-label="Zwiększ czcionkę" title="A+" (click)="fontSizeService.increase()">
+              A+
+            </button>
+          </div>
           <button class="btn btn-outline" (click)="navigateToHome()">
-            🏠 Strona główna
+            <span role="img" aria-label="Ikona domu">🏠</span> Strona główna
           </button>
           <button class="btn btn-outline" (click)="navigateToTransactions()">
-            💰 Transakcje
+            <span role="img" aria-label="Ikona pieniędzy">💰</span> Transakcje
           </button>
           <button class="btn btn-danger" (click)="logout()">
-            🚪 Wyloguj się
+            <span role="img" aria-label="Ikona drzwi">🚪</span> Wyloguj się
           </button>
         </nav>
       </div>
@@ -25,20 +53,20 @@
   <div class="container">
     <div class="page-header">
       <div class="header-content">
-        <h1 class="page-title">📊 Statystyki finansowe</h1>
+        <h1 class="page-title"><span role="img" aria-label="Ikona wykresów">📊</span> Statystyki finansowe</h1>
         <p class="page-subtitle">Analizuj swoje wydatki i przychody</p>
       </div>
       
       <div class="header-actions">
         <button (click)="refreshStatistics()" class="btn btn-primary">
-          <span class="icon">🔄</span>
+          <span class="icon" role="img" aria-label="Ikona odświeżania">🔄</span>
           Odśwież
         </button>
       </div>
     </div>
 
     <div class="filters-section">
-      <h3>📅 Okres statystyk</h3>
+      <h3><span role="img" aria-label="Ikona kalendarza">📅</span> Okres statystyk</h3>
       <div class="filter-options">
         <div class="quick-filters">
           <button 
@@ -82,7 +110,7 @@
         <div *ngIf="selectedPeriod === 'custom'" class="custom-date-range">
           <div class="date-inputs">
             <div class="input-group">
-              <label for="startDate">📅 Data od:</label>
+              <label for="startDate"><span role="img" aria-label="Ikona kalendarza">📅</span> Data od:</label>
               <input 
                 type="date" 
                 id="startDate" 
@@ -90,7 +118,7 @@
                 (change)="applyCustomDateRange()">
             </div>
             <div class="input-group">
-              <label for="endDate">📅 Data do:</label>
+              <label for="endDate"><span role="img" aria-label="Ikona kalendarza">📅</span> Data do:</label>
               <input 
                 type="date" 
                 id="endDate" 
@@ -113,22 +141,22 @@
   <div *ngIf="!loading && !error">
     <div class="overview-cards" *ngIf="overallStats">
       <div class="stat-card income">
-        <h3>💰 Łączne przychody</h3>
+        <h3><span role="img" aria-label="Ikona pieniędzy">💰</span> Łączne przychody</h3>
         <p class="amount">{{ overallStats.totalIncome | currency:'PLN':'symbol':'1.2-2' }}</p>
       </div>
       
       <div class="stat-card expenses">
-        <h3>💸 Łączne wydatki</h3>
+        <h3><span role="img" aria-label="Ikona pieniędzy ze skrzydłami">💸</span> Łączne wydatki</h3>
         <p class="amount">{{ overallStats.totalExpenses | currency:'PLN':'symbol':'1.2-2' }}</p>
       </div>
       
       <div class="stat-card balance" [class.positive]="overallStats.currentBalance >= 0" [class.negative]="overallStats.currentBalance < 0">
-        <h3>📈 Bilans</h3>
+        <h3><span role="img" aria-label="Ikona wykresu wzrostowego">📈</span> Bilans</h3>
         <p class="amount">{{ overallStats.currentBalance | currency:'PLN':'symbol':'1.2-2' }}</p>
       </div>
       
       <div class="stat-card transactions">
-        <h3>📋 Liczba transakcji</h3>
+        <h3><span role="img" aria-label="Ikona schowka">📋</span> Liczba transakcji</h3>
         <p class="amount">{{ overallStats.totalTransactions }}</p>
       </div>
     </div>
@@ -164,7 +192,7 @@
       </div>
 
       <div class="chart-container" *ngIf="monthlyStats.length > 0">
-        <h3>📊 Miesięczne przychody vs wydatki</h3>
+        <h3><span role="img" aria-label="Ikona wykresów">📊</span> Miesięczne przychody vs wydatki</h3>
         <div class="chart-wrapper">
           <canvas 
             baseChart
@@ -201,7 +229,7 @@
     </div>
 
     <div *ngIf="categoryExpenses.length === 0 && monthlyStats.length === 0" class="no-data">
-      <p>📈 Brak danych do wyświetlenia statystyk.</p>
+      <p><span role="img" aria-label="Ikona wykresu wzrostowego">📈</span> Brak danych do wyświetlenia statystyk.</p>
       <p>Dodaj kilka transakcji, aby zobaczyć wykresy!</p>
     </div>
   </div>

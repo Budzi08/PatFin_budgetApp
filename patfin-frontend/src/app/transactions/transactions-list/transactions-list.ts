@@ -6,6 +6,8 @@ import { CategoriesService, Category } from '../../categories/categories';
 import { TransactionsAdd } from '../transactions-add/transactions-add';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
+import { FontSizeService } from '../../core/font-size.service';
+import { ThemeService, Theme } from '../../core/theme.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -23,8 +25,14 @@ export class TransactionsList {
   
   filters: TransactionFilter = {};
   showFilters = false;
+  showThemeDropdown = false;
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(
+    private auth: AuthService, 
+    private router: Router,
+    public fontSizeService: FontSizeService,
+    public themeService: ThemeService
+  ) {
     this.isAdmin = this.auth.isAdmin();
     this.loadCategories();
     this.refresh();
@@ -102,5 +110,14 @@ export class TransactionsList {
       return -Math.abs(transaction.amount);
     }
     return Math.abs(transaction.amount);
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 }

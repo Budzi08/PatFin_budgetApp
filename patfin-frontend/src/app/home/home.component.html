@@ -3,28 +3,84 @@
     <div class="container">
       <div class="header-content">
         <div class="logo">
-          <h1>💰 PatFin</h1>
+          <h1><span role="img" aria-label="Ikona pieniędzy">💰</span> PatFin</h1>
           <span class="tagline">Zarządzaj swoimi finansami</span>
         </div>
         
         <nav class="nav-buttons" *ngIf="!isLoggedIn()">
+          <div class="theme-controls">
+            <button 
+              class="theme-toggle-button"
+              [attr.aria-label]="'Zmień motyw'"
+              [title]="'Wybierz motyw'"
+              (click)="toggleThemeDropdown()">
+              🎨
+            </button>
+            <div class="theme-dropdown" *ngIf="showThemeDropdown">
+              <button 
+                *ngFor="let theme of themeService.themes"
+                class="theme-option"
+                [class.active]="themeService.getCurrentTheme() === theme.id"
+                [attr.aria-label]="theme.name + ': ' + theme.description"
+                (click)="selectTheme(theme.id)">
+                <span class="theme-icon">{{ theme.icon }}</span>
+                <span class="theme-name">{{ theme.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-controls">
+            <button class="btn-icon" aria-label="Zmniejsz czcionkę" title="A-" (click)="fontSizeService.decrease()">
+              A-
+            </button>
+            <button class="btn-icon" aria-label="Zwiększ czcionkę" title="A+" (click)="fontSizeService.increase()">
+              A+
+            </button>
+          </div>
           <button class="btn btn-outline" (click)="navigateToLogin()">
-            🔐 Zaloguj się
+            <span role="img" aria-label="Ikona kłódki">🔐</span> Zaloguj się
           </button>
           <button class="btn btn-primary" (click)="navigateToRegister()">
-            ✨ Załóż konto
+            <span role="img" aria-label="Ikona iskierek">✨</span> Załóż konto
           </button>
         </nav>
 
         <nav class="nav-buttons" *ngIf="isLoggedIn()">
+          <div class="theme-controls">
+            <button 
+              class="theme-toggle-button"
+              [attr.aria-label]="'Zmień motyw'"
+              [title]="'Wybierz motyw'"
+              (click)="toggleThemeDropdown()">
+              🎨
+            </button>
+            <div class="theme-dropdown" *ngIf="showThemeDropdown">
+              <button 
+                *ngFor="let theme of themeService.themes"
+                class="theme-option"
+                [class.active]="themeService.getCurrentTheme() === theme.id"
+                [attr.aria-label]="theme.name + ': ' + theme.description"
+                (click)="selectTheme(theme.id)">
+                <span class="theme-icon">{{ theme.icon }}</span>
+                <span class="theme-name">{{ theme.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-controls">
+            <button class="btn-icon" aria-label="Zmniejsz czcionkę" title="A-" (click)="fontSizeService.decrease()">
+              A-
+            </button>
+            <button class="btn-icon" aria-label="Zwiększ czcionkę" title="A+" (click)="fontSizeService.increase()">
+              A+
+            </button>
+          </div>
           <div class="user-info">
             <span class="welcome">Witaj, {{ getUserEmail() }}!</span>
           </div>
           <button class="btn btn-primary" (click)="navigateToTransactions()">
-            📊 Moje transakcje
+            <span role="img" aria-label="Ikona wykresów">📊</span> Moje transakcje
           </button>
           <button class="btn btn-outline" (click)="logout()">
-            🚪 Wyloguj
+            <span role="img" aria-label="Ikona drzwi">🚪</span> Wyloguj
           </button>
         </nav>
       </div>
@@ -44,16 +100,16 @@
         
         <div class="hero-actions" *ngIf="!isLoggedIn()">
           <button class="btn btn-primary btn-large" (click)="navigateToRegister()">
-            🚀 Rozpocznij za darmo
+            <span role="img" aria-label="Ikona rakiety">🚀</span> Rozpocznij za darmo
           </button>
           <button class="btn btn-outline btn-large" (click)="navigateToLogin()">
-            📱 Mam już konto
+            <span role="img" aria-label="Ikona telefonu">📱</span> Mam już konto
           </button>
         </div>
 
         <div class="hero-actions" *ngIf="isLoggedIn()">
           <button class="btn btn-primary btn-large" (click)="navigateToTransactions()">
-            📊 Przejdź do aplikacji
+            <span role="img" aria-label="Ikona wykresów">📊</span> Przejdź do aplikacji
           </button>
         </div>
       </div>
@@ -61,7 +117,7 @@
       <div class="hero-image">
         <div class="mockup-card" (click)="onSummaryCardClick()">
           <div class="card-header">
-            💰 {{ isLoggedIn() ? 'Twoje podsumowanie' : 'Przykładowe podsumowanie' }}
+            <span role="img" aria-label="Ikona pieniędzy">💰</span> {{ isLoggedIn() ? 'Twoje podsumowanie' : 'Przykładowe podsumowanie' }}
           </div>
           <div class="card-body" *ngIf="!isLoggedIn()">
             <div class="stat-item">
@@ -98,7 +154,7 @@
           <div class="card-body" *ngIf="isLoggedIn() && userStats.loading">
             <div class="stat-item">
               <span class="stat-label">Ładowanie...</span>
-              <span class="stat-value">⏳</span>
+              <span class="stat-value" role="img" aria-label="Ikona klepsydry">⏳</span>
             </div>
           </div>
         </div>
@@ -112,37 +168,37 @@
       
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">📊</div>
+          <div class="feature-icon" role="img" aria-label="Ikona wykresów">📊</div>
           <h4>Śledzenie transakcji</h4>
           <p>Dodawaj i kategoryzuj swoje przychody i wydatki. Miej pełną kontrolę nad swoim budżetem.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">📈</div>
+          <div class="feature-icon" role="img" aria-label="Ikona wykresu wzrostowego">📈</div>
           <h4>Statystyki i raporty</h4>
           <p>Analizuj swoje wydatki za pomocą interaktywnych wykresów i szczegółowych raportów.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">🔍</div>
+          <div class="feature-icon" role="img" aria-label="Ikona lupy">🔍</div>
           <h4>Zaawansowane filtry</h4>
           <p>Filtruj transakcje według daty, kwoty i kategorii. Znajdź dokładnie to czego szukasz.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">🏷️</div>
+          <div class="feature-icon" role="img" aria-label="Ikona etykiety">🏷️</div>
           <h4>Kategorie</h4>
           <p>Organizuj swoje transakcje za pomocą kategorii.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">🔒</div>
+          <div class="feature-icon" role="img" aria-label="Ikona kłódki">🔒</div>
           <h4>Bezpieczeństwo</h4>
           <p>Twoje dane są bezpieczne dzięki zaawansowanym mechanizmom uwierzytelniania.</p>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">📱</div>
+          <div class="feature-icon" role="img" aria-label="Ikona telefonu">📱</div>
           <h4>Responsywność</h4>
           <p>Korzystaj z aplikacji na komputerze, tablecie lub smartfonie - wszędzie wygląda świetnie.</p>
         </div>
@@ -154,7 +210,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-brand">
-          <h4>💰 PatFin</h4>
+          <h4><span role="img" aria-label="Ikona pieniędzy">💰</span> PatFin</h4>
           <p>Zarządzanie finansami osobistymi</p>
         </div>
         

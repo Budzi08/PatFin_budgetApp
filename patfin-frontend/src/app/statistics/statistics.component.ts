@@ -7,6 +7,8 @@ import { BaseChartDirective } from 'ng2-charts';
 import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { FontSizeService } from '../core/font-size.service';
+import { ThemeService, Theme } from '../core/theme.service';
 
 
 Chart.register(...registerables);
@@ -24,6 +26,7 @@ export class StatisticsComponent implements OnInit {
   monthlyStats: MonthlyStats[] = [];
   loading = true;
   error: string | null = null;
+  showThemeDropdown = false;
 
   // Filtry czasowe
   selectedPeriod: string = 'all';
@@ -77,15 +80,15 @@ export class StatisticsComponent implements OnInit {
       {
         label: 'Przychody',
         data: [],
-        backgroundColor: '#4CAF50',
-        borderColor: '#4CAF50',
+        backgroundColor: '#28a745',
+        borderColor: '#28a745',
         borderWidth: 1
       },
       {
         label: 'Wydatki',
         data: [],
-        backgroundColor: '#F44336',
-        borderColor: '#F44336',
+        backgroundColor: '#dc3545',
+        borderColor: '#dc3545',
         borderWidth: 1
       }
     ]
@@ -120,8 +123,36 @@ export class StatisticsComponent implements OnInit {
   constructor(
     private statisticsService: StatisticsService,
     private router: Router,
-    private auth: AuthService
-  ) {}
+    private auth: AuthService,
+    public fontSizeService: FontSizeService,
+    public themeService: ThemeService
+  ) {
+    // Set Chart.js global font defaults to use relative sizes
+    Chart.defaults.font.size = 14; // Base size in px, will scale with root font-size changes
+    
+    // Subscribe to font size changes to refresh charts
+    this.fontSizeService.fontSizeChanged$.subscribe(() => {
+      // Small delay to let DOM update
+      setTimeout(() => {
+        if (this.categoryExpenses.length > 0 || this.monthlyStats.length > 0) {
+          this.updateCharts();
+        }
+      }, 50);
+    });
+    
+    // Subscribe to theme changes to update chart colors
+    this.themeService.themeChanged$.subscribe(() => {
+      setTimeout(() => {
+        if (this.categoryExpenses.length > 0 || this.monthlyStats.length > 0) {
+          this.updateCharts();
+        }
+      }, 50);
+    });
+  }
+  
+  private getCSSColor(variableName: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  }
 
   ngOnInit() {
     this.loadStatistics();
@@ -189,17 +220,24 @@ export class StatisticsComponent implements OnInit {
 
   private updatePieChart() {
     if (this.categoryExpenses.length > 0) {
+      // Get colors from CSS variables or use fallback
+      const accentPrimary = this.getCSSColor('--accent-primary') || '#51cf66';
+      const infoColor = this.getCSSColor('--info-color') || '#2196F3';
+      const warningColor = this.getCSSColor('--warning-color') || '#FF9800';
+      const errorColor = this.getCSSColor('--error-color') || '#dc3545';
+      const successColor = this.getCSSColor('--success-color') || '#28a745';
+      
       this.pieChartData = {
         labels: this.categoryExpenses.map(item => item.categoryName),
         datasets: [{
           data: this.categoryExpenses.map(item => Math.abs(item.totalAmount)),
           backgroundColor: [
-            '#FF6384',
-            '#36A2EB', 
-            '#FFCE56',
-            '#4BC0C0',
+            accentPrimary,
+            infoColor,
+            warningColor,
+            errorColor,
+            successColor,
             '#9966FF',
-            '#FF9F40',
             '#FF6384',
             '#C9CBCF'
           ]
@@ -215,21 +253,24 @@ export class StatisticsComponent implements OnInit {
         return a.month - b.month;
       });
 
+      const successColor = this.getCSSColor('--success-color') || '#4CAF50';
+      const errorColor = this.getCSSColor('--error-color') || '#F44336';
+
       this.barChartData = {
         labels: sortedStats.map(item => this.getMonthName(item.month, item.year)),
         datasets: [
           {
             label: 'Przychody',
             data: sortedStats.map(item => item.totalIncome),
-            backgroundColor: '#4CAF50',
-            borderColor: '#4CAF50',
+            backgroundColor: successColor,
+            borderColor: successColor,
             borderWidth: 1
           },
           {
             label: 'Wydatki',
             data: sortedStats.map(item => Math.abs(item.totalExpenses)),
-            backgroundColor: '#F44336',
-            borderColor: '#F44336',
+            backgroundColor: errorColor,
+            borderColor: errorColor,
             borderWidth: 1
           }
         ]
@@ -288,5 +329,14 @@ export class StatisticsComponent implements OnInit {
     }
     
     return params;
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 }

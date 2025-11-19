@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { FontSizeService } from './core/font-size.service';
 
 @Component({
   selector: 'app-root',
@@ -9,4 +10,14 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected title = 'patfin-frontend';
+
+  constructor(public fontSizeService: FontSizeService) {}
+
+  increaseFont() {
+    this.fontSizeService.increase();
+  }
+
+  decreaseFont() {
+    this.fontSizeService.decrease();
+  }
 }

@@ -3,6 +3,8 @@ import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FontSizeService } from '../../core/font-size.service';
+import { ThemeService, Theme } from '../../core/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -16,8 +18,14 @@ export class Login {
   error = '';
   isLoading = false;
   showPassword = false;
+  showThemeDropdown = false;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    public fontSizeService: FontSizeService,
+    public themeService: ThemeService
+  ) { }
 
   onLogin() {
     if (!this.email || !this.password) {
@@ -76,5 +84,14 @@ export class Login {
 
   navigateToRegister() {
     this.router.navigate(['/register']);
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 }

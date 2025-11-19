@@ -1,6 +1,6 @@
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #51cf66 0%, #40c057 50%, #51cf66 100%);
+  background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 50%, var(--accent-gradient-start) 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   display: flex;
@@ -104,10 +104,10 @@
 
 // Auth Card
 .auth-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 3rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px var(--shadow-hover);
   
   @media (max-width: 768px) {
     padding: 2rem;
@@ -120,14 +120,14 @@
   margin-bottom: 2rem;
   
   .auth-title {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
     font-weight: 700;
   }
   
   .auth-subtitle {
-    color: #7f8c8d;
+    color: var(--text-secondary);
     margin: 0;
     font-size: 1rem;
     line-height: 1.5;
@@ -143,29 +143,29 @@
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
-      color: #2c3e50;
+      color: var(--text-primary);
       font-size: 0.9rem;
     }
     
     .form-input {
       width: 100%;
       padding: 1rem;
-      border: 2px solid #e9ecef;
+      border: 2px solid var(--border-color);
       border-radius: 12px;
       font-size: 1rem;
       transition: all 0.3s ease;
-      background: #f8f9fa;
+      background: var(--bg-secondary);
       
       &:focus {
         outline: none;
-        border-color: #51cf66;
-        background: white;
-        box-shadow: 0 0 0 3px rgba(81, 207, 102, 0.1);
+        border-color: var(--accent-primary);
+        background: var(--bg-card);
+        box-shadow: 0 0 0 3px var(--accent-shadow-light);
         transform: translateY(-1px);
       }
       
       &::placeholder {
-        color: #adb5bd;
+        color: var(--text-secondary);
       }
     }
     
@@ -189,7 +189,7 @@
         z-index: 10;
         
         &:hover {
-          background: rgba(81, 207, 102, 0.1);
+          background: var(--accent-shadow-light);
         }
       }
       
@@ -197,22 +197,22 @@
         width: 100%;
         padding: 1rem;
         padding-right: 50px;
-        border: 2px solid #e9ecef;
+        border: 2px solid var(--border-color);
         border-radius: 12px;
         font-size: 1rem;
         transition: all 0.3s ease;
-        background: #f8f9fa;
+        background: var(--bg-secondary);
         
         &:focus {
           outline: none;
-          border-color: #667eea;
-          background: white;
+          border-color: var(--accent-primary);
+          background: var(--bg-card);
           box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
           transform: translateY(-1px);
         }
         
         &::placeholder {
-          color: #adb5bd;
+          color: var(--text-secondary);
         }
       }
     }
@@ -220,15 +220,15 @@
   
   .btn.btn-outline {
     background: transparent;
-    border: 2px solid #51cf66;
-    color: #51cf66;
+    border: 2px solid var(--accent-primary);
+    color: var(--accent-primary);
     margin-top: 1rem;
     
     &:hover {
-      background: #51cf66;
+      background: var(--accent-primary);
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(81, 207, 102, 0.3);
+      box-shadow: 0 8px 20px var(--accent-shadow-medium);
     }
   }
 }
@@ -257,7 +257,7 @@
       top: 0;
       bottom: 0;
       width: 4px;
-      background: #e74c3c;
+      background: var(--error-color);
     }
     
     .error-icon {
@@ -266,7 +266,7 @@
     }
     
     span:nth-child(2) {
-      color: #c33;
+      color: var(--error-color, #c33);
       font-size: 0.9rem;
       font-weight: 500;
       flex: 1;
@@ -275,7 +275,7 @@
     .error-close {
       background: none;
       border: none;
-      color: #c33;
+      color: var(--error-color, #c33);
       font-size: 1rem;
       cursor: pointer;
       padding: 4px;
@@ -369,12 +369,12 @@
   }
   
   &.btn-primary {
-    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
     color: white;
     
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(81, 207, 102, 0.4);
+      box-shadow: 0 12px 30px var(--accent-shadow-strong);
     }
     
     &:active:not(:disabled) {
@@ -519,13 +519,13 @@
 
 @keyframes focusPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0.4);
+    box-shadow: 0 0 0 0 var(--accent-shadow-strong);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(81, 207, 102, 0);
+    box-shadow: 0 0 0 6px transparent;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 

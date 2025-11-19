@@ -3,13 +3,41 @@
     <div class="container">
       <div class="header-content">
         <div class="logo" (click)="navigateToHome()">
-          <h1>💰 PatFin</h1>
+          <h1><span role="img" aria-label="Ikona pieniędzy">💰</span> PatFin</h1>
           <span class="tagline">Zarządzaj swoimi finansami</span>
         </div>
         
         <nav class="nav-buttons">
+          <div class="theme-controls">
+            <button 
+              class="theme-toggle-button"
+              [attr.aria-label]="'Zmień motyw'"
+              [title]="'Wybierz motyw'"
+              (click)="toggleThemeDropdown()">
+              🎨
+            </button>
+            <div class="theme-dropdown" *ngIf="showThemeDropdown">
+              <button 
+                *ngFor="let theme of themeService.themes"
+                class="theme-option"
+                [class.active]="themeService.getCurrentTheme() === theme.id"
+                [attr.aria-label]="theme.name + ': ' + theme.description"
+                (click)="selectTheme(theme.id)">
+                <span class="theme-icon">{{ theme.icon }}</span>
+                <span class="theme-name">{{ theme.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-controls">
+            <button class="btn-icon" aria-label="Zmniejsz czcionkę" title="A-" (click)="fontSizeService.decrease()">
+              A-
+            </button>
+            <button class="btn-icon" aria-label="Zwiększ czcionkę" title="A+" (click)="fontSizeService.increase()">
+              A+
+            </button>
+          </div>
           <button class="btn btn-outline" (click)="navigateToHome()">
-            🏠 Strona główna
+            <span role="img" aria-label="Ikona domu">🏠</span> Strona główna
           </button>
           <button class="btn btn-text" (click)="navigateToLogin()">
             Masz już konto? <strong>Zaloguj się</strong>
@@ -24,7 +52,7 @@
       <div class="auth-wrapper">
         <div class="auth-card">
           <div class="auth-header-card">
-            <h2 class="auth-title">✨ Załóż konto</h2>
+            <h2 class="auth-title"><span role="img" aria-label="Ikona iskierek">✨</span> Załóż konto</h2>
             <p class="auth-subtitle">Rozpocznij zarządzanie swoimi finansami z PatFin</p>
           </div>
 
@@ -72,24 +100,24 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-full">
-              🚀 Stwórz konto
+              <span role="img" aria-label="Ikona rakiety">🚀</span> Stwórz konto
             </button>
 
             <button type="button" class="btn btn-outline btn-full" (click)="navigateToLogin()">
-              🔐 Zaloguj się do istniejącego konta
+              <span role="img" aria-label="Ikona kłódki">🔐</span> Zaloguj się do istniejącego konta
             </button>
           </form>
 
           <div class="error-message" *ngIf="error">
             <div class="error-content">
-              <span class="error-icon">⚠️</span>
+              <span class="error-icon" role="img" aria-label="Ikona ostrzeżenia">⚠️</span>
               <span>{{ error }}</span>
             </div>
           </div>
 
           <div class="success-message" *ngIf="success">
             <div class="success-content">
-              <span class="success-icon">✅</span>
+              <span class="success-icon" role="img" aria-label="Ikona ptaszka">✅</span>
               <span>{{ success }}</span>
             </div>
           </div>
@@ -101,7 +129,7 @@
             
             <div class="benefits-list">
               <div class="benefit-item">
-                <span class="benefit-icon">🆓</span>
+                <span class="benefit-icon" role="img" aria-label="Ikona FREE">🆓</span>
                 <div>
                   <h4>Całkowicie za darmo</h4>
                   <p>Bez opłat, bez ukrytych kosztów. PatFin jest w 100% darmowy</p>
@@ -109,7 +137,7 @@
               </div>
               
               <div class="benefit-item">
-                <span class="benefit-icon">⚡</span>
+                <span class="benefit-icon" role="img" aria-label="Ikona błyskawicy">⚡</span>
                 <div>
                   <h4>Szybka konfiguracja</h4>
                   <p>Załóż konto w mniej niż minutę i zacznij zarządzać finansami</p>
@@ -117,7 +145,7 @@
               </div>
               
               <div class="benefit-item">
-                <span class="benefit-icon">📈</span>
+                <span class="benefit-icon" role="img" aria-label="Ikona wykresu wzrostowego">📈</span>
                 <div>
                   <h4>Inteligentne analizy</h4>
                   <p>Otrzymuj personalizowane raporty i rekomendacje finansowe</p>

@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { CategoriesService, Category } from '../../categories/categories';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
+import { FontSizeService } from '../../core/font-size.service';
+import { ThemeService, Theme } from '../../core/theme.service';
 
 @Component({
   selector: 'app-categories-admin',
@@ -17,10 +19,13 @@ export class CategoriesAdminComponent {
   newCategory = '';
   isLoading = false;
   error = '';
+  showThemeDropdown = false;
 
 constructor(
   private categoriesService: CategoriesService,
-  private auth: AuthService
+  private auth: AuthService,
+  public fontSizeService: FontSizeService,
+  public themeService: ThemeService
 ) {
   this.refresh();
 }
@@ -52,5 +57,14 @@ constructor(
   }
   get isAdmin() {
     return this.auth.isAdmin();
+  }
+
+  toggleThemeDropdown() {
+    this.showThemeDropdown = !this.showThemeDropdown;
+  }
+
+  selectTheme(themeId: string) {
+    this.themeService.applyTheme(themeId as any);
+    this.showThemeDropdown = false;
   }
 }
