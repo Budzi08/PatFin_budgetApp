@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "transactions")
-public class Transaction {
+public class Transaction implements Cloneable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +38,71 @@ public class Transaction {
         this.type = type;
         this.category = category;
         this.user = user;
+    }
+
+    @Override
+    public Transaction clone() {
+        try {
+            Transaction cloned = (Transaction) super.clone();
+            cloned.id = null;
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Klonowanie Transaction nie powiodło się", e);
+        }
+    }
+
+    public static class Builder {
+        private BigDecimal amount;
+        private String description;
+        private LocalDate date;
+        private TransactionType type;
+        private Category category;
+        private User user;
+
+        public Builder amount(BigDecimal amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public Builder type(TransactionType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder category(Category category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder user(User user) {
+            this.user = user;
+            return this;
+        }
+
+        public Transaction build() {
+            Transaction t = new Transaction();
+            t.amount = this.amount != null ? this.amount.abs() : BigDecimal.ZERO;
+            t.description = this.description;
+            t.date = this.date != null ? this.date : LocalDate.now();
+            t.type = this.type;
+            t.category = this.category;
+            t.user = this.user;
+            return t;
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     // Getters and Setters

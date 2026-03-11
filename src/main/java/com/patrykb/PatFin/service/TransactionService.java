@@ -9,12 +9,56 @@ import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.Category;
 import com.patrykb.PatFin.model.enums.TransactionType;
 
+import com.patrykb.PatFin.config.AuditLogger;
+
 import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class TransactionService {
+
+    interface TransactionFactory {
+        Transaction create(BigDecimal amount, String description, LocalDate date,
+                          Category category, User user);
+    }
+
+    static class IncomeFactory implements TransactionFactory {
+        @Override
+        public Transaction create(BigDecimal amount, String description, LocalDate date,
+                                  Category category, User user) {
+            return Transaction.builder()
+                    .amount(amount.abs())
+                    .description(description)
+                    .date(date)
+                    .type(TransactionType.INCOME)
+                    .category(category)
+                    .user(user)
+                    .build();
+        }
+    }
+
+    static class ExpenseFactory implements TransactionFactory {
+        @Override
+        public Transaction create(BigDecimal amount, String description, LocalDate date,
+                                  Category category, User user) {
+            return Transaction.builder()
+                    .amount(amount.abs())
+                    .description(description)
+                    .date(date)
+                    .type(TransactionType.EXPENSE)
+                    .category(category)
+                    .user(user)
+                    .build();
+        }
+    }
+
+    private TransactionFactory getFactory(TransactionType type) {
+        return switch (type) {
+            case INCOME -> new IncomeFactory();
+            case EXPENSE -> new ExpenseFactory();
+        };
+    }
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -31,20 +75,29 @@ public class TransactionService {
     }
 
     public Transaction save(TransactionDto dto, User user) {
-        Transaction transaction = new Transaction();
-        
-        BigDecimal amount = dto.getAmount().abs();
-        
-        transaction.setAmount(amount);
-        transaction.setDescription(dto.getDescription());
-        transaction.setDate(dto.getDate());
-        transaction.setType(dto.getType());
-        transaction.setUser(user);
+        Category category = null;
         if (dto.getCategoryId() != null) {
-            Category category = categoryService.findById(dto.getCategoryId());
-            transaction.setCategory(category);
+            category = categoryService.findById(dto.getCategoryId());
         }
-        return transactionRepository.save(transaction);
+
+        TransactionFactory factory = getFactory(dto.getType());
+        Transaction transaction = factory.create(
+                dto.getAmount(), dto.getDescription(), dto.getDate(), category, user);
+
+        Transaction saved = transactionRepository.save(transaction);
+        AuditLogger.INSTANCE.logTransaction(user.getEmail(), "CREATE", saved.getId());
+        return saved;
+    }
+
+    public Transaction duplicate(Long transactionId, User user) {
+        Transaction original = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        if (!original.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+        Transaction cloned = original.clone();
+        cloned.setDate(LocalDate.now());
+        return transactionRepository.save(cloned);
     }
 
     public List<Transaction> findAllByUserWithFilters(User user, LocalDate startDate, LocalDate endDate,
@@ -72,7 +125,8 @@ public class TransactionService {
         if (!transaction.getUser().equals(user)) {
             throw new RuntimeException("Unauthorized to delete this transaction");
         }
-        
+
+        AuditLogger.INSTANCE.logTransaction(user.getEmail(), "DELETE", id);
         transactionRepository.deleteById(id);
     }
 

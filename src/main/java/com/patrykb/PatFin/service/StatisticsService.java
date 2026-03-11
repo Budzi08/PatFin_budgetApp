@@ -19,28 +19,29 @@ public class StatisticsService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    public StatisticsDto.OverallStats getOverallStats(User user) {
-        StatisticsDto.OverallStats stats = new StatisticsDto.OverallStats();
+    static class StatsDtoFactory {
+        static StatisticsDto.CategoryStats createCategoryStats(String name, BigDecimal amount, Long count) {
+            return new StatisticsDto.CategoryStats(name, amount, count);
+        }
 
+        static StatisticsDto.MonthlyStats createMonthlyStats(int year, int month,
+                                                              BigDecimal income, BigDecimal expenses) {
+            return new StatisticsDto.MonthlyStats(year, month, income, expenses);
+        }
+    }
+
+    public StatisticsDto.OverallStats getOverallStats(User user) {
         BigDecimal totalIncome = transactionRepository.findTotalAmountByUserAndType(user, TransactionType.INCOME);
         BigDecimal totalExpenses = transactionRepository.findTotalAmountByUserAndType(user, TransactionType.EXPENSE);
-        
-        if (totalIncome == null) totalIncome = BigDecimal.ZERO;
-        if (totalExpenses == null) totalExpenses = BigDecimal.ZERO;
 
-        stats.setTotalIncome(totalIncome);
-        stats.setTotalExpenses(totalExpenses);
-        stats.setCurrentBalance(totalIncome.subtract(totalExpenses));
-        stats.setTotalTransactions(transactionRepository.countByUser(user));
-
-        // Statystyki per kategoria
-        stats.setExpensesByCategory(getCategoryStats(user, TransactionType.EXPENSE));
-        stats.setIncomeByCategory(getCategoryStats(user, TransactionType.INCOME));
-
-        // Statystyki miesięczne
-        stats.setMonthlyStats(getMonthlyStats(user));
-
-        return stats;
+        return StatisticsDto.OverallStats.builder()
+                .totalIncome(totalIncome)
+                .totalExpenses(totalExpenses)
+                .totalTransactions(transactionRepository.countByUser(user))
+                .expensesByCategory(getCategoryStats(user, TransactionType.EXPENSE))
+                .incomeByCategory(getCategoryStats(user, TransactionType.INCOME))
+                .monthlyStats(getMonthlyStats(user))
+                .build();
     }
 
     public List<StatisticsDto.CategoryStats> getCategoryStats(User user, TransactionType type) {
@@ -52,7 +53,7 @@ public class StatisticsService {
             BigDecimal totalAmount = (BigDecimal) result[1];
             Long transactionCount = (Long) result[2];
 
-            categoryStats.add(new StatisticsDto.CategoryStats(categoryName, totalAmount, transactionCount));
+            categoryStats.add(StatsDtoFactory.createCategoryStats(categoryName, totalAmount, transactionCount));
         }
 
         return categoryStats;
@@ -69,8 +70,8 @@ public class StatisticsService {
             BigDecimal amount = (BigDecimal) result[3];
 
             String key = year + "-" + month;
-            StatisticsDto.MonthlyStats monthlyStats = monthlyMap.getOrDefault(key, 
-                new StatisticsDto.MonthlyStats(year, month, BigDecimal.ZERO, BigDecimal.ZERO));
+            StatisticsDto.MonthlyStats monthlyStats = monthlyMap.getOrDefault(key,
+                StatsDtoFactory.createMonthlyStats(year, month, BigDecimal.ZERO, BigDecimal.ZERO));
 
             if (type == TransactionType.INCOME) {
                 monthlyStats.setTotalIncome(amount);

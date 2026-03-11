@@ -5,7 +5,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Cloneable {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -27,6 +27,19 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdAt = LocalDateTime.now();
+    }
+
+    @Override
+    public User clone() {
+        try {
+            User cloned = (User) super.clone();
+            cloned.id = null;
+            cloned.createdAt = LocalDateTime.now();
+            cloned.transactions = null;
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Klonowanie User nie powiodło się", e);
+        }
     }
 
     public boolean isAdmin() {

@@ -7,6 +7,8 @@ import com.patrykb.PatFin.service.StatisticsService;
 import com.patrykb.PatFin.service.TransactionService;
 import com.patrykb.PatFin.service.UserService;
 import com.patrykb.PatFin.model.enums.TransactionType;
+import com.patrykb.PatFin.config.CurrencyFormatter;
+import com.patrykb.PatFin.config.AppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,6 +90,34 @@ public class StatisticsController {
         summary.put("totalTransactions", new BigDecimal(transactions.size()));
 
         return summary;
+    }
+
+    @GetMapping("/summary-formatted")
+    public Map<String, String> getSummaryFormatted() {
+        User user = getCurrentUser();
+        List<Transaction> transactions = transactionService.findAllByUser(user);
+
+        BigDecimal income = transactions.stream()
+                .filter(t -> t.getType() == TransactionType.INCOME)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal expense = transactions.stream()
+                .filter(t -> t.getType() == TransactionType.EXPENSE)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        CurrencyFormatter formatter = CurrencyFormatter.getInstance();
+        AppConfig config = AppConfig.getInstance();
+
+        Map<String, String> formatted = new HashMap<>();
+        formatted.put("income", formatter.formatWithSign(income, true));
+        formatted.put("expense", formatter.formatWithSign(expense, false));
+        formatted.put("balance", formatter.format(income.subtract(expense)));
+        formatted.put("currency", config.getDefaultCurrency());
+        formatted.put("vatRate", String.valueOf(config.getVatRate()));
+
+        return formatted;
     }
 
     @GetMapping("/summary-all")

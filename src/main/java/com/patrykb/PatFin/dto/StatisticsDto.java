@@ -114,6 +114,61 @@ public class StatisticsDto {
 
         public OverallStats() {}
 
+        public static class Builder {
+            private BigDecimal totalIncome = BigDecimal.ZERO;
+            private BigDecimal totalExpenses = BigDecimal.ZERO;
+            private Long totalTransactions = 0L;
+            private List<CategoryStats> expensesByCategory;
+            private List<CategoryStats> incomeByCategory;
+            private List<MonthlyStats> monthlyStats;
+
+            public Builder totalIncome(BigDecimal totalIncome) {
+                this.totalIncome = totalIncome != null ? totalIncome : BigDecimal.ZERO;
+                return this;
+            }
+
+            public Builder totalExpenses(BigDecimal totalExpenses) {
+                this.totalExpenses = totalExpenses != null ? totalExpenses : BigDecimal.ZERO;
+                return this;
+            }
+
+            public Builder totalTransactions(Long totalTransactions) {
+                this.totalTransactions = totalTransactions != null ? totalTransactions : 0L;
+                return this;
+            }
+
+            public Builder expensesByCategory(List<CategoryStats> expensesByCategory) {
+                this.expensesByCategory = expensesByCategory;
+                return this;
+            }
+
+            public Builder incomeByCategory(List<CategoryStats> incomeByCategory) {
+                this.incomeByCategory = incomeByCategory;
+                return this;
+            }
+
+            public Builder monthlyStats(List<MonthlyStats> monthlyStats) {
+                this.monthlyStats = monthlyStats;
+                return this;
+            }
+
+            public OverallStats build() {
+                OverallStats stats = new OverallStats();
+                stats.totalIncome = this.totalIncome;
+                stats.totalExpenses = this.totalExpenses;
+                stats.currentBalance = this.totalIncome.subtract(this.totalExpenses);
+                stats.totalTransactions = this.totalTransactions;
+                stats.expensesByCategory = this.expensesByCategory;
+                stats.incomeByCategory = this.incomeByCategory;
+                stats.monthlyStats = this.monthlyStats;
+                return stats;
+            }
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
         // Getters and Setters
         public BigDecimal getTotalIncome() {
             return totalIncome;

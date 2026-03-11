@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "categories")
-public class Category {
+public class Category implements Cloneable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -13,6 +13,17 @@ public class Category {
     private String name;
 
     public Category(){
+    }
+
+    @Override
+    public Category clone() {
+        try {
+            Category cloned = (Category) super.clone();
+            cloned.id = null;
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Klonowanie Category nie powiodło się", e);
+        }
     }
 
     public Long getId() {
