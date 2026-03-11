@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.dto.RegisterRequest;
+import com.patrykb.PatFin.config.AuditLogger;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,13 +19,28 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    static class ResponseFactory {
+        static JwtResponse jwt(String token) {
+            return new JwtResponse(token);
+        }
+
+        static RegisterResponse success(String message) {
+            return new RegisterResponse(message);
+        }
+
+        static ErrorResponse error(String error) {
+            return new ErrorResponse(error);
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             userService.registerUser(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok(new RegisterResponse("Rejestracja zakończona sukcesem"));
+            AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
+            return ResponseEntity.ok(ResponseFactory.success("Rejestracja zakończona sukcesem"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(ResponseFactory.error(e.getMessage()));
         }
     }
 
@@ -32,10 +48,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userService.findByEmail(loginRequest.getEmail());
         if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body(new ErrorResponse("Invalid email or password"));
+            return ResponseEntity.status(401).body(ResponseFactory.error("Invalid email or password"));
         }
         String token = jwtUtil.generateToken(user.getEmail(), user.isAdmin());
-        return ResponseEntity.ok(new JwtResponse(token));
+        AuditLogger.INSTANCE.logAuth(user.getEmail(), "LOGIN");
+        return ResponseEntity.ok(ResponseFactory.jwt(token));
     }
 
     static class LoginRequest {

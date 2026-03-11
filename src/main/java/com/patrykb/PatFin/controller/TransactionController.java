@@ -68,4 +68,12 @@ public class TransactionController {
         transactionService.deleteById(id, user);
     }
 
+    @PostMapping("/{id}/duplicate")
+    public Transaction duplicateTransaction(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userService.findByEmail(email);
+        return transactionService.duplicate(id, user);
+    }
+
 }

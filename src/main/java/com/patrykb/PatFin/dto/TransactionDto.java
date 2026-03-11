@@ -23,6 +23,47 @@ public class TransactionDto {
         this.categoryId = categoryId;
     }
 
+    public static class Builder {
+        private BigDecimal amount;
+        private String description;
+        private LocalDate date;
+        private TransactionType type;
+        private Long categoryId;
+
+        public Builder amount(BigDecimal amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public Builder type(TransactionType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder categoryId(Long categoryId) {
+            this.categoryId = categoryId;
+            return this;
+        }
+
+        public TransactionDto build() {
+            return new TransactionDto(amount, description, date, type, categoryId);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     // Getters and Setters
     public BigDecimal getAmount() {
         return amount;
