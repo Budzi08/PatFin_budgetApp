@@ -9,6 +9,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.math.BigDecimal;
+
+import com.patrykb.PatFin.pattern.composite.BudgetGroup;
+import com.patrykb.PatFin.pattern.composite.CategoryBudget;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -19,7 +23,16 @@ public class CategoryController {
 
     @GetMapping
     public List<Category> getAll() {
-        return categoryService.findAll();
+        List<Category> categories = categoryService.findAll();
+
+        // WZORZEC: Composite (Use 3)
+        BudgetGroup masterBudget = new BudgetGroup();
+        for (Category c : categories) {
+            masterBudget.add(new CategoryBudget(new BigDecimal("500.00")));
+        }
+        System.out.println("Zasymulowany łączny limit budżetu kategorii: " + masterBudget.getBudgetLimit() + " PLN");
+
+        return categories;
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
