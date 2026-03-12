@@ -9,6 +9,12 @@ import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.dto.RegisterRequest;
 import com.patrykb.PatFin.config.AuditLogger;
 
+import com.patrykb.PatFin.pattern.adapter.ExternalAuthRequest;
+import com.patrykb.PatFin.pattern.adapter.RegisterRequestAuthAdapter;
+import com.patrykb.PatFin.pattern.decorator.NotificationSender;
+import com.patrykb.PatFin.pattern.decorator.BasicNotificationSender;
+import com.patrykb.PatFin.pattern.decorator.LoggingNotificationDecorator;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -36,8 +42,17 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
+            // WZORZEC: Adapter (Use 3) - adaptacja Requestu do zewnętrznego interfejsu
+            ExternalAuthRequest externalReq = new RegisterRequestAuthAdapter(request);
+            System.out.println("External Auth Adapter - Principal: " + externalReq.getPrincipal());
+
             userService.registerUser(request.getEmail(), request.getPassword());
             AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
+
+            // WZORZEC: Decorator (Use 3) - dynamiczne dodanie logowania do wysyłki powiadomień
+            NotificationSender sender = new LoggingNotificationDecorator(new BasicNotificationSender());
+            sender.send("Witaj " + request.getEmail() + " w systemie PatFin!");
+
             return ResponseEntity.ok(ResponseFactory.success("Rejestracja zakończona sukcesem"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ResponseFactory.error(e.getMessage()));

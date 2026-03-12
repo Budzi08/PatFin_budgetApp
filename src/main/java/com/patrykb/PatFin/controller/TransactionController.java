@@ -16,6 +16,18 @@ import java.math.BigDecimal;
 import org.springframework.security.core.Authentication;
 import com.patrykb.PatFin.model.User;
 
+import com.patrykb.PatFin.pattern.decorator.TransactionDataSource;
+import com.patrykb.PatFin.pattern.decorator.DatabaseTransactionSource;
+import com.patrykb.PatFin.pattern.decorator.CachedTransactionSource;
+import com.patrykb.PatFin.pattern.bridge.Alert;
+import com.patrykb.PatFin.pattern.bridge.OverdraftAlert;
+import com.patrykb.PatFin.pattern.bridge.EmailChannel;
+import com.patrykb.PatFin.pattern.adapter.ExportableItem;
+import com.patrykb.PatFin.pattern.adapter.TransactionExportAdapter;
+import com.patrykb.PatFin.pattern.decorator.ExportWriter;
+import com.patrykb.PatFin.pattern.decorator.SimpleExportWriter;
+import com.patrykb.PatFin.pattern.decorator.HtmlExportWriterDecorator;
+
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -32,6 +44,10 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
+
+        // WZORZEC: Decorator (Use 1)
+        TransactionDataSource source = new CachedTransactionSource(new DatabaseTransactionSource(transactionService));
+
         return transactionService.findAllByUser(user);
     }
 
@@ -40,7 +56,35 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
-        return transactionService.save(dto, user);
+        Transaction saved = transactionService.save(dto, user);
+
+        // WZORZEC: Bridge (Use 2) - Wysyłamy alert przekroczenia budżetu, jeśli wydatek > 1000 PLN
+        if (saved.getType() == TransactionType.EXPENSE && saved.getAmount().compareTo(new BigDecimal("1000")) > 0) {
+            Alert alert = new OverdraftAlert(new EmailChannel());
+            alert.trigger("Zarejestrowano bardzo wysoki wydatek: " + saved.getAmount());
+        }
+
+        return saved;
+    }
+
+    @GetMapping("/export")
+    public String exportTransactions() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userService.findByEmail(email);
+        List<Transaction> transactions = transactionService.findAllByUser(user);
+
+        StringBuilder sb = new StringBuilder();
+        for(Transaction t : transactions) {
+            // WZORZEC: Adapter (Use 1)
+            ExportableItem item = new TransactionExportAdapter(t);
+            sb.append("Tytul: ").append(item.getExportTitle())
+                    .append(" | Kwota: ").append(item.getExportValue()).append("<br/>");
+        }
+
+        // WZORZEC: Decorator (Use 2) - Dekorowanie wyjścia formatem HTML
+        ExportWriter writer = new HtmlExportWriterDecorator(new SimpleExportWriter());
+        return writer.write(sb.toString());
     }
 
     @GetMapping("/filter")
