@@ -12,12 +12,17 @@ import com.patrykb.PatFin.config.AuditLogger;
 import com.patrykb.PatFin.pattern.adapter.ExternalAuthRequest;
 import com.patrykb.PatFin.pattern.adapter.RegisterRequestAuthAdapter;
 import com.patrykb.PatFin.pattern.decorator.NotificationSender;
+import com.patrykb.PatFin.pattern.facade.UserOnboardingFacade;
 import com.patrykb.PatFin.pattern.decorator.BasicNotificationSender;
 import com.patrykb.PatFin.pattern.decorator.LoggingNotificationDecorator;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+
+    @Autowired
+    private UserOnboardingFacade onboardingFacade;
 
     @Autowired
     private UserService userService;
@@ -46,8 +51,11 @@ public class AuthController {
             ExternalAuthRequest externalReq = new RegisterRequestAuthAdapter(request);
             System.out.println("External Auth Adapter - Principal: " + externalReq.getPrincipal());
 
-            userService.registerUser(request.getEmail(), request.getPassword());
-            AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
+
+            //userService.registerUser(request.getEmail(), request.getPassword());
+            //AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
+            //Facade - rejestracja użytkownika wraz z domyślnymi kategoriami i logowaniem zdarzenia w jednym miejscu
+            onboardingFacade.onboardNewUser(request.getEmail(), request.getPassword());
 
             // WZORZEC: Decorator (Use 3) - dynamiczne dodanie logowania do wysyłki powiadomień
             NotificationSender sender = new LoggingNotificationDecorator(new BasicNotificationSender());

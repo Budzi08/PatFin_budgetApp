@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 import com.patrykb.PatFin.pattern.composite.TransactionGroup;
 import com.patrykb.PatFin.pattern.composite.TransactionItem;
+import com.patrykb.PatFin.pattern.facade.ReportingFacade;
+import com.patrykb.PatFin.pattern.proxy.ExecutionTimingProxy;
 import com.patrykb.PatFin.pattern.adapter.ChartData;
 import com.patrykb.PatFin.pattern.adapter.MonthlyStatsChartAdapter;
 import com.patrykb.PatFin.pattern.bridge.ChartRenderer;
@@ -38,6 +40,10 @@ import com.patrykb.PatFin.pattern.bridge.JsonFormatter;
 @RequestMapping("/api/statistics")
 public class StatisticsController {
 
+
+    @Autowired
+    private ReportingFacade reportingFacade;
+
     @Autowired
     private TransactionService transactionService;
 
@@ -46,6 +52,9 @@ public class StatisticsController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ExecutionTimingProxy timingProxy;
 
     @GetMapping("/summary")
     public Map<String, BigDecimal> getSummary(
@@ -107,8 +116,9 @@ public class StatisticsController {
     }
 
     @GetMapping("/summary-formatted")
-    public Map<String, String> getSummaryFormatted() {
+    public Map<String, Object> getSummaryFormatted() {
         User user = getCurrentUser();
+        /* 
         List<Transaction> transactions = transactionService.findAllByUser(user);
 
         BigDecimal income = transactions.stream()
@@ -132,6 +142,9 @@ public class StatisticsController {
         formatted.put("vatRate", String.valueOf(config.getVatRate()));
 
         return formatted;
+        */
+       // WZORZEC: Facade użycie 3 - Cała logika obliczeń, pobierania danych  i formatowania walut jest ukryta wewnątrz fasady
+        return reportingFacade.getFormattedFinancialSummary(user);
     }
 
     @GetMapping("/summary-all")
@@ -337,7 +350,9 @@ public class StatisticsController {
     @GetMapping("/overview")
     public StatisticsDto.OverallStats getOverallStats() {
         User user = getCurrentUser();
-        return statisticsService.getOverallStats(user);
+        //return statisticsService.getOverallStats(user);
+        // WZORZEC: Proxy - Pomiar czasu wykonania i logowanie jeśli przekroczy 50ms
+        return timingProxy.getStatsWithTiming(user);
     }
 
     @GetMapping("/categories/{type}")

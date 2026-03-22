@@ -17,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import com.patrykb.PatFin.model.User;
 
 import com.patrykb.PatFin.pattern.decorator.TransactionDataSource;
+import com.patrykb.PatFin.pattern.facade.FinancialOperationFacade;
+import com.patrykb.PatFin.pattern.proxy.SecurityTransactionProxy;
 import com.patrykb.PatFin.pattern.decorator.DatabaseTransactionSource;
 import com.patrykb.PatFin.pattern.decorator.CachedTransactionSource;
 import com.patrykb.PatFin.pattern.bridge.Alert;
@@ -27,11 +29,17 @@ import com.patrykb.PatFin.pattern.adapter.TransactionExportAdapter;
 import com.patrykb.PatFin.pattern.decorator.ExportWriter;
 import com.patrykb.PatFin.pattern.decorator.SimpleExportWriter;
 import com.patrykb.PatFin.pattern.decorator.HtmlExportWriterDecorator;
-
+import com.patrykb.PatFin.pattern.proxy.SecurityTransactionProxy;
 
 @RestController
 @RequestMapping("/api/transactions")
 public class TransactionController {
+
+    @Autowired
+    private SecurityTransactionProxy securityProxy;
+
+    @Autowired
+    private FinancialOperationFacade financialFacade;
 
     @Autowired
     private TransactionService transactionService;
@@ -56,7 +64,9 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
-        Transaction saved = transactionService.save(dto, user);
+        //Transaction saved = transactionService.save(dto, user);
+        //WZORZEC Facade użycie 2 - rejestracja transakcji wraz z weryfikacją kategorii i automatycznym audytem
+        Transaction saved = financialFacade.registerTransaction(dto, user);
 
         // WZORZEC: Bridge (Use 2) - Wysyłamy alert przekroczenia budżetu, jeśli wydatek > 1000 PLN
         if (saved.getType() == TransactionType.EXPENSE && saved.getAmount().compareTo(new BigDecimal("1000")) > 0) {
@@ -109,7 +119,9 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
-        transactionService.deleteById(id, user);
+        //transactionService.deleteById(id, user);
+        // WZORZEC: Proxy - Bezpieczeństwo operacji usuwania transakcji
+        securityProxy.safeDelete(id, user);
     }
 
     @PostMapping("/{id}/duplicate")
