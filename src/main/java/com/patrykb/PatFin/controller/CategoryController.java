@@ -6,17 +6,25 @@ import com.patrykb.PatFin.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.math.BigDecimal;
 
+
 import com.patrykb.PatFin.pattern.composite.BudgetGroup;
 import com.patrykb.PatFin.pattern.composite.CategoryBudget;
+import com.patrykb.PatFin.pattern.proxy.AuditCategoryProxy;
+
 
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
+
+    @Autowired
+    private AuditCategoryProxy auditProxy;
 
     @Autowired
     private CategoryService categoryService;
@@ -38,7 +46,11 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public Category add(@RequestBody Category category) {
-        return categoryService.save(category);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) auth.getPrincipal();
+        //return categoryService.save(category);
+        // WZORZEC: Proxy - automatyczne logowanie przy tworzeniu kategorii przez administratora
+        return auditProxy.saveAndAudit(category, email);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

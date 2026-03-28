@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.patrykb.PatFin.pattern.flyweight.AuditAction;
+import com.patrykb.PatFin.pattern.flyweight.AuditActionFactory;
+
 public enum AuditLogger {
 
     INSTANCE;
@@ -14,8 +17,11 @@ public enum AuditLogger {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void log(String action, String userEmail, String details) {
+        // WZORZEC: Flyweight - "Wymieniamy" zwykły String na współdzielony obiekt pyłka
+        AuditAction actionFlyweight = AuditActionFactory.getAction(action);
+
         String entry = String.format("[%s] [%s] Użytkownik: %s | %s",
-                LocalDateTime.now().format(formatter), action, userEmail, details);
+                LocalDateTime.now().format(formatter),actionFlyweight.severity(), actionFlyweight.type(), userEmail, details);
         logs.add(entry);
         System.out.println("AUDIT: " + entry);
     }

@@ -6,6 +6,7 @@ import com.patrykb.PatFin.config.AuditLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -39,4 +40,8 @@ public class CategoryService {
         AuditLogger.INSTANCE.logAdmin("SYSTEM", "CATEGORY_DELETE", "ID: " + id);
         categoryRepository.deleteById(id);
     }
+
+    public Optional<Category> findByName(String name) {
+        return categoryRepository.findByName(name);
+    }   
 }

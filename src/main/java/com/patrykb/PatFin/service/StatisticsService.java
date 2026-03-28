@@ -3,6 +3,8 @@ package com.patrykb.PatFin.service;
 import com.patrykb.PatFin.dto.StatisticsDto;
 import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.enums.TransactionType;
+import com.patrykb.PatFin.pattern.flyweight.TransactionTypeSchema;
+import com.patrykb.PatFin.pattern.flyweight.TransactionTypeSchemaFactory;
 import com.patrykb.PatFin.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,13 +75,20 @@ public class StatisticsService {
             StatisticsDto.MonthlyStats monthlyStats = monthlyMap.getOrDefault(key,
                 StatsDtoFactory.createMonthlyStats(year, month, BigDecimal.ZERO, BigDecimal.ZERO));
 
+
+            // WZORZEC: Flyweight - pobieramy schemat matematyczny dla typu
+            TransactionTypeSchema schema = TransactionTypeSchemaFactory.getSchema(type);
+
             if (type == TransactionType.INCOME) {
                 monthlyStats.setTotalIncome(amount);
             } else {
                 monthlyStats.setTotalExpenses(amount);
             }
 
-            monthlyStats.setBalance(monthlyStats.getTotalIncome().subtract(monthlyStats.getTotalExpenses()));
+            //monthlyStats.setBalance(monthlyStats.getTotalIncome().subtract(monthlyStats.getTotalExpenses()));
+            BigDecimal impact = amount.multiply(schema.multiplier());
+            monthlyStats.setBalance(monthlyStats.getBalance().add(impact));
+            
             monthlyMap.put(key, monthlyStats);
         }
 
