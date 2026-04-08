@@ -2,6 +2,11 @@ package com.patrykb.PatFin.service;
 
 import com.patrykb.PatFin.dto.TransactionDto;
 import com.patrykb.PatFin.model.Transaction;
+import com.patrykb.PatFin.pattern.interpreter.AmountGreaterExpression;
+import com.patrykb.PatFin.pattern.interpreter.AndExpression;
+import com.patrykb.PatFin.pattern.interpreter.TransactionExpression;
+import com.patrykb.PatFin.pattern.interpreter.TypeExpression;
+import com.patrykb.PatFin.pattern.mediator.PatFinMediator;
 import com.patrykb.PatFin.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,6 +79,10 @@ public class TransactionService {
         return transactionRepository.findAllByUser(user);
     }
 
+    // L5 Mediator #2
+    @Autowired
+    private PatFinMediator mediator;
+
     public Transaction save(TransactionDto dto, User user) {
         Category category = null;
         if (dto.getCategoryId() != null) {
@@ -108,14 +117,30 @@ public class TransactionService {
             user, startDate, endDate, minAmount, maxAmount, type, categoryId);
         
 
+//        return transactions.stream()
+//            .filter(t -> startDate == null || !t.getDate().isBefore(startDate))
+//            .filter(t -> endDate == null || !t.getDate().isAfter(endDate))
+//            .filter(t -> minAmount == null || t.getAmount().compareTo(minAmount) >= 0)
+//            .filter(t -> maxAmount == null || t.getAmount().compareTo(maxAmount) <= 0)
+//            .filter(t -> type == null || t.getType().equals(type))
+//            .filter(t -> categoryId == null || (t.getCategory() != null && t.getCategory().getId().equals(categoryId)))
+//            .collect(java.util.stream.Collectors.toList());
+
+        // L5 Interpreter #1, #2, #3
+        TransactionExpression filter = t -> true; // Domyślnie przepuszczaj wszystko
+
+        if (minAmount != null) {
+            filter = new AndExpression(filter, new AmountGreaterExpression(minAmount));
+        }
+        if (type != null) {
+            filter = new AndExpression(filter, new TypeExpression(type));
+        }
+
+        final TransactionExpression finalFilter = filter;
         return transactions.stream()
-            .filter(t -> startDate == null || !t.getDate().isBefore(startDate))
-            .filter(t -> endDate == null || !t.getDate().isAfter(endDate))
-            .filter(t -> minAmount == null || t.getAmount().compareTo(minAmount) >= 0)
-            .filter(t -> maxAmount == null || t.getAmount().compareTo(maxAmount) <= 0)
-            .filter(t -> type == null || t.getType().equals(type))
-            .filter(t -> categoryId == null || (t.getCategory() != null && t.getCategory().getId().equals(categoryId)))
-            .collect(java.util.stream.Collectors.toList());
+                .filter(finalFilter::interpret)
+                .collect(java.util.stream.Collectors.toList());
+
     }
 
     public void deleteById(Long id, User user) {
@@ -128,8 +153,11 @@ public class TransactionService {
         }
             */
 
-        AuditLogger.INSTANCE.logTransaction(user.getEmail(), "DELETE", id);
+//        AuditLogger.INSTANCE.logTransaction(user.getEmail(), "DELETE", id);
         transactionRepository.deleteById(id);
+
+        // L5 Mediator #2 Reakcja na usunięcie
+        mediator.notify(this, "TRANSACTION_DELETED");
     }
 
 }

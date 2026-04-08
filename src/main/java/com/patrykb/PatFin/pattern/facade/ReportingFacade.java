@@ -2,6 +2,7 @@ package com.patrykb.PatFin.pattern.facade;
 
 import com.patrykb.PatFin.dto.StatisticsDto;
 import com.patrykb.PatFin.model.User;
+import com.patrykb.PatFin.pattern.memento.ConfigMemento;
 import com.patrykb.PatFin.service.StatisticsService;
 import com.patrykb.PatFin.config.CurrencyFormatter;
 import com.patrykb.PatFin.config.AppConfig;
@@ -24,6 +25,9 @@ public class ReportingFacade {
         CurrencyFormatter formatter = CurrencyFormatter.getInstance();
         AppConfig config = AppConfig.getInstance();
 
+        // L5 Memento #3 zapis stanu przed zmianami
+        ConfigMemento checkpoint = config.save();
+
         Map<String, Object> report = new HashMap<>();
         
         // Łączymy surowe dane z logiką formatowania i konfiguracją waluty
@@ -39,6 +43,10 @@ public class ReportingFacade {
         report.put("expenseFormatted", formatter.formatWithSign(stats.getTotalExpenses(), false));
         report.put("currency", config.getDefaultCurrency());
         report.put("transactionCount", stats.getTotalTransactions());
+
+        // 2. L5 Memento #3 Przywracany stan
+        // Dzięki temu jest pewność, że tymczasowe zmiany w raporcie nie wyciekły do reszty systemu
+        config.restore(checkpoint);
         
         return report;
     }

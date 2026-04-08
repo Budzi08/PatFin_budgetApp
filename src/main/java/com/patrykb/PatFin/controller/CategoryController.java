@@ -1,6 +1,7 @@
 package com.patrykb.PatFin.controller;
 
 import com.patrykb.PatFin.model.Category;
+import com.patrykb.PatFin.pattern.iterator.PatFinIterator;
 import com.patrykb.PatFin.service.CategoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,22 @@ public class CategoryController {
 
         // WZORZEC: Composite (Use 3)
         BudgetGroup masterBudget = new BudgetGroup();
-        for (Category c : categories) {
+//        for (Category c : categories) {
+//            masterBudget.add(new CategoryBudget(new BigDecimal("500.00")));
+//        }
+
+        // L5 Iterator #2
+        PatFinIterator<Category> catIt = new PatFinIterator<>() {
+            private int cursor = 0;
+            public boolean hasNext() { return cursor < categories.size(); }
+            public Category next() { return categories.get(cursor++); }
+        };
+
+        while (catIt.hasNext()) {
+            Category c = catIt.next(); // Pobieramy kategorię przez iterator
             masterBudget.add(new CategoryBudget(new BigDecimal("500.00")));
         }
+
         System.out.println("Zasymulowany łączny limit budżetu kategorii: " + masterBudget.getBudgetLimit() + " PLN");
 
         return categories;
