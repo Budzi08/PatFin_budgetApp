@@ -1,5 +1,6 @@
 package com.patrykb.PatFin.controller;
 
+import com.patrykb.PatFin.pattern.command.UserOnboardingCommand;
 import com.patrykb.PatFin.security.JwtUtil;
 import com.patrykb.PatFin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,19 +48,23 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
-            // WZORZEC: Adapter (Use 3) - adaptacja Requestu do zewnętrznego interfejsu
-            ExternalAuthRequest externalReq = new RegisterRequestAuthAdapter(request);
-            System.out.println("External Auth Adapter - Principal: " + externalReq.getPrincipal());
+//            // WZORZEC: Adapter (Use 3) - adaptacja Requestu do zewnętrznego interfejsu
+//            ExternalAuthRequest externalReq = new RegisterRequestAuthAdapter(request);
+//            System.out.println("External Auth Adapter - Principal: " + externalReq.getPrincipal());
+//
+//
+//            //userService.registerUser(request.getEmail(), request.getPassword());
+//            //AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
+//            //Facade - rejestracja użytkownika wraz z domyślnymi kategoriami i logowaniem zdarzenia w jednym miejscu
+//            onboardingFacade.onboardNewUser(request.getEmail(), request.getPassword());
+//
+//            // WZORZEC: Decorator (Use 3) - dynamiczne dodanie logowania do wysyłki powiadomień
+//            NotificationSender sender = new LoggingNotificationDecorator(new BasicNotificationSender());
+//            sender.send("Witaj " + request.getEmail() + " w systemie PatFin!");
 
-
-            //userService.registerUser(request.getEmail(), request.getPassword());
-            //AuditLogger.INSTANCE.logAuth(request.getEmail(), "REGISTER");
-            //Facade - rejestracja użytkownika wraz z domyślnymi kategoriami i logowaniem zdarzenia w jednym miejscu
-            onboardingFacade.onboardNewUser(request.getEmail(), request.getPassword());
-
-            // WZORZEC: Decorator (Use 3) - dynamiczne dodanie logowania do wysyłki powiadomień
-            NotificationSender sender = new LoggingNotificationDecorator(new BasicNotificationSender());
-            sender.send("Witaj " + request.getEmail() + " w systemie PatFin!");
+            // L5 Command #3
+            UserOnboardingCommand onboardCommand = new UserOnboardingCommand(onboardingFacade, request.getEmail(), request.getPassword());
+            onboardCommand.execute();
 
             return ResponseEntity.ok(ResponseFactory.success("Rejestracja zakończona sukcesem"));
         } catch (RuntimeException e) {

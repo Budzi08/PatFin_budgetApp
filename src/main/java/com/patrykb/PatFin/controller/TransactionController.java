@@ -2,6 +2,10 @@ package com.patrykb.PatFin.controller;
 
 import com.patrykb.PatFin.dto.TransactionDto;
 import com.patrykb.PatFin.model.Transaction;
+import com.patrykb.PatFin.pattern.command.DeleteTransactionCommand;
+import com.patrykb.PatFin.pattern.command.FinancialCommand;
+import com.patrykb.PatFin.pattern.command.RegisterTransactionCommand;
+import com.patrykb.PatFin.pattern.iterator.PatFinIterator;
 import com.patrykb.PatFin.service.TransactionService;
 import com.patrykb.PatFin.service.UserService;
 import com.patrykb.PatFin.model.enums.TransactionType;
@@ -64,17 +68,24 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
-        //Transaction saved = transactionService.save(dto, user);
-        //WZORZEC Facade użycie 2 - rejestracja transakcji wraz z weryfikacją kategorii i automatycznym audytem
-        Transaction saved = financialFacade.registerTransaction(dto, user);
 
-        // WZORZEC: Bridge (Use 2) - Wysyłamy alert przekroczenia budżetu, jeśli wydatek > 1000 PLN
-        if (saved.getType() == TransactionType.EXPENSE && saved.getAmount().compareTo(new BigDecimal("1000")) > 0) {
-            Alert alert = new OverdraftAlert(new EmailChannel());
-            alert.trigger("Zarejestrowano bardzo wysoki wydatek: " + saved.getAmount());
-        }
+//        //Transaction saved = transactionService.save(dto, user);
+//        //WZORZEC Facade użycie 2 - rejestracja transakcji wraz z weryfikacją kategorii i automatycznym audytem
+//        Transaction saved = financialFacade.registerTransaction(dto, user);
+//
+//        // WZORZEC: Bridge (Use 2) - Wysyłamy alert przekroczenia budżetu, jeśli wydatek > 1000 PLN
+//        if (saved.getType() == TransactionType.EXPENSE && saved.getAmount().compareTo(new BigDecimal("1000")) > 0) {
+//            Alert alert = new OverdraftAlert(new EmailChannel());
+//            alert.trigger("Zarejestrowano bardzo wysoki wydatek: " + saved.getAmount());
+//        }
 
-        return saved;
+//        return saved;
+
+        // L5 Command #2
+        RegisterTransactionCommand regCommand = new RegisterTransactionCommand(financialFacade, dto, user);
+        regCommand.execute();
+
+        return regCommand.getResult();
     }
 
     @GetMapping("/export")
@@ -85,8 +96,22 @@ public class TransactionController {
         List<Transaction> transactions = transactionService.findAllByUser(user);
 
         StringBuilder sb = new StringBuilder();
-        for(Transaction t : transactions) {
-            // WZORZEC: Adapter (Use 1)
+//        for(Transaction t : transactions) {
+//            // WZORZEC: Adapter (Use 1)
+//            ExportableItem item = new TransactionExportAdapter(t);
+//            sb.append("Tytul: ").append(item.getExportTitle())
+//                    .append(" | Kwota: ").append(item.getExportValue()).append("<br/>");
+//        }
+
+        // L5 Iterator #1
+        PatFinIterator<Transaction> it = new PatFinIterator<>() {
+            private int index = 0;
+            public boolean hasNext() { return index < transactions.size(); }
+            public Transaction next() { return transactions.get(index++); }
+        };
+
+        while (it.hasNext()) {
+            Transaction t = it.next();
             ExportableItem item = new TransactionExportAdapter(t);
             sb.append("Tytul: ").append(item.getExportTitle())
                     .append(" | Kwota: ").append(item.getExportValue()).append("<br/>");
@@ -119,9 +144,13 @@ public class TransactionController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
-        //transactionService.deleteById(id, user);
-        // WZORZEC: Proxy - Bezpieczeństwo operacji usuwania transakcji
-        securityProxy.safeDelete(id, user);
+//        //transactionService.deleteById(id, user);
+//        // WZORZEC: Proxy - Bezpieczeństwo operacji usuwania transakcji
+//        securityProxy.safeDelete(id, user);
+
+        // L5 Command #1
+        FinancialCommand delCommand = new DeleteTransactionCommand(securityProxy, id, user);
+        delCommand.execute();
     }
 
     @PostMapping("/{id}/duplicate")

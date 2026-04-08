@@ -5,6 +5,7 @@ import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.enums.TransactionType;
 import com.patrykb.PatFin.pattern.flyweight.TransactionTypeSchema;
 import com.patrykb.PatFin.pattern.flyweight.TransactionTypeSchemaFactory;
+import com.patrykb.PatFin.pattern.iterator.PatFinIterator;
 import com.patrykb.PatFin.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,12 +51,24 @@ public class StatisticsService {
         List<Object[]> results = transactionRepository.findAmountByCategoryAndType(user, type);
         List<StatisticsDto.CategoryStats> categoryStats = new ArrayList<>();
 
-        for (Object[] result : results) {
-            String categoryName = (String) result[0];
-            BigDecimal totalAmount = (BigDecimal) result[1];
-            Long transactionCount = (Long) result[2];
+//        for (Object[] result : results) {
+//            String categoryName = (String) result[0];
+//            BigDecimal totalAmount = (BigDecimal) result[1];
+//            Long transactionCount = (Long) result[2];
+//
+//            categoryStats.add(StatsDtoFactory.createCategoryStats(categoryName, totalAmount, transactionCount));
+//        }
 
-            categoryStats.add(StatsDtoFactory.createCategoryStats(categoryName, totalAmount, transactionCount));
+        // L5 Iterator #3
+        PatFinIterator<Object[]> resIt = new PatFinIterator<>() {
+            private int i = 0;
+            public boolean hasNext() { return i < results.size(); }
+            public Object[] next() { return results.get(i++); }
+        };
+
+        while (resIt.hasNext()) {
+            Object[] res = resIt.next();
+            categoryStats.add(StatsDtoFactory.createCategoryStats((String)res[0], (BigDecimal)res[1], (Long)res[2]));
         }
 
         return categoryStats;

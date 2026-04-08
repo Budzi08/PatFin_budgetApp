@@ -2,6 +2,7 @@ package com.patrykb.PatFin.pattern.facade;
 
 import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.Category;
+import com.patrykb.PatFin.pattern.mediator.PatFinMediator;
 import com.patrykb.PatFin.service.UserService;
 import com.patrykb.PatFin.service.CategoryService;
 import com.patrykb.PatFin.config.AuditLogger;
@@ -19,18 +20,25 @@ public class UserOnboardingFacade {
     @Autowired
     private CategoryService categoryService;
 
+    // L5 Mediator #1
+    @Autowired
+    private PatFinMediator mediator;
+
     @Transactional
     public User onboardNewUser(String email, String password) {
         // 1. Rejestracja użytkownika
         User user = userService.registerUser(email, password);
 
-        // 2. Tworzenie domyślnych kategorii
-        ensureCategoryExists("Jedzenie");
-        ensureCategoryExists("Transport");
-        ensureCategoryExists("Rozrywka");
+//        // 2. Tworzenie domyślnych kategorii
+//        ensureCategoryExists("Jedzenie");
+//        ensureCategoryExists("Transport");
+//        ensureCategoryExists("Rozrywka");
+//
+//        // 3. Logowanie zdarzenia
+//        AuditLogger.INSTANCE.logAuth(email, "FULL_ONBOARDING_SUCCESS");
 
-        // 3. Logowanie zdarzenia
-        AuditLogger.INSTANCE.logAuth(email, "FULL_ONBOARDING_SUCCESS");
+        // L5 Mediator #1
+        mediator.notify(this, "USER_ONBOARDED");
 
         return user;
     }
