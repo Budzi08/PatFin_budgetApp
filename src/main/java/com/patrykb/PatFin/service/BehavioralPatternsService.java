@@ -3,18 +3,31 @@ package com.patrykb.PatFin.service;
 import com.patrykb.PatFin.model.Transaction;
 import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.model.enums.TransactionType;
+
 import com.patrykb.PatFin.pattern.observer.AuditObserver;
 import com.patrykb.PatFin.pattern.observer.CategoryObserver;
 import com.patrykb.PatFin.pattern.observer.ThresholdObserver;
 import com.patrykb.PatFin.pattern.observer.TransactionEventPublisher;
+import com.patrykb.PatFin.pattern.observer.notification.*;
+import com.patrykb.PatFin.pattern.observer.status.*;
+
 import com.patrykb.PatFin.pattern.state.BudgetLifecycleContext;
+import com.patrykb.PatFin.pattern.state.transaction.*;
+import com.patrykb.PatFin.pattern.state.account.*;
+
 import com.patrykb.PatFin.pattern.strategy.ExpenseRatioStrategy;
 import com.patrykb.PatFin.pattern.strategy.MetricContext;
 import com.patrykb.PatFin.pattern.strategy.NetBalanceStrategy;
 import com.patrykb.PatFin.pattern.strategy.SavingsRateStrategy;
+import com.patrykb.PatFin.pattern.strategy.export.*;
+import com.patrykb.PatFin.pattern.strategy.sort.*;
+
 import com.patrykb.PatFin.pattern.template.CategoryReportTemplate;
 import com.patrykb.PatFin.pattern.template.MonthlyReportTemplate;
 import com.patrykb.PatFin.pattern.template.SummaryReportTemplate;
+import com.patrykb.PatFin.pattern.template.dataimport.*;
+import com.patrykb.PatFin.pattern.template.notification.*;
+
 import com.patrykb.PatFin.pattern.visitor.BalanceElement;
 import com.patrykb.PatFin.pattern.visitor.CsvMetricsVisitor;
 import com.patrykb.PatFin.pattern.visitor.ExpenseElement;
@@ -23,6 +36,9 @@ import com.patrykb.PatFin.pattern.visitor.IncomeElement;
 import com.patrykb.PatFin.pattern.visitor.JsonMetricsVisitor;
 import com.patrykb.PatFin.pattern.visitor.MetricElement;
 import com.patrykb.PatFin.pattern.visitor.MetricsVisitor;
+import com.patrykb.PatFin.pattern.visitor.audit.*;
+import com.patrykb.PatFin.pattern.visitor.tax.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +48,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 @Service
 public class BehavioralPatternsService {
@@ -65,106 +82,134 @@ public class BehavioralPatternsService {
     }
 
     private Map<String, Object> runObserverDemo(Transaction transaction) {
+        Map<String, Object> out = new LinkedHashMap<>();
+
+        // USAGE 1: Transaction Event (Existing)
         List<String> logs = new ArrayList<>();
         TransactionEventPublisher publisher = new TransactionEventPublisher();
-
-        // observer 1/3
         publisher.subscribe(new AuditObserver());
-        // observer 2/3
         publisher.subscribe(new ThresholdObserver(new BigDecimal("500")));
-        // observer 3/3
         publisher.subscribe(new CategoryObserver());
-
-        // observer usage
         publisher.publish(transaction, logs);
+        out.put("usage_1_transaction", logs);
 
-        Map<String, Object> out = new LinkedHashMap<>();
-        out.put("transaction", transaction.getDescription());
-        out.put("notifications", logs);
+        // USAGE 2: Notifications
+        NotificationSubject ns = new NotificationSubject();
+        ns.addObserver(new EmailNotificationObserver());
+        ns.addObserver(new SmsNotificationObserver());
+        ns.notifyObservers("Alert: System update");
+        out.put("usage_2_notifications", "Fired to Email and SMS (see console)");
+
+        // USAGE 3: System Status
+        SystemStatusSubject ss = new SystemStatusSubject();
+        ss.attach(new LoggingStatusObserver());
+        ss.attach(new DashboardStatusObserver());
+        ss.setStatus("MAINTENANCE");
+        out.put("usage_3_status", "Status changed to MAINTENANCE");
+
         return out;
     }
 
     private Map<String, Object> runStateDemo(Transaction transaction) {
+        Map<String, Object> out = new LinkedHashMap<>();
+
+        // USAGE 1: Budget Lifecycle (Existing)
         BudgetLifecycleContext context = new BudgetLifecycleContext();
         List<String> flow = new ArrayList<>();
-
-        // state 1/3 usage
         flow.add(context.handle(transaction));
         context.nextState();
-        // state 2/3 usage
         flow.add(context.handle(transaction));
-        context.nextState();
-        // state 3/3 usage
-        flow.add(context.handle(transaction));
+        out.put("usage_1_budget_lifecycle", flow);
 
-        Map<String, Object> out = new LinkedHashMap<>();
-        out.put("flow", flow);
-        out.put("finalState", context.currentStateName());
+        // USAGE 2: Transaction State
+        TransactionStateContext txState = new TransactionStateContext();
+        txState.request(); // Pending
+        txState.request(); // Completed
+        out.put("usage_2_transaction_state", "Transitioned Pending -> Completed");
+
+        // USAGE 3: Account State
+        AccountStateContext accState = new AccountStateContext();
+        accState.setState(new ActiveAccountState());
+        accState.applyState();
+        accState.setState(new SuspendedAccountState());
+        accState.applyState();
+        out.put("usage_3_account_state", "Checked Active and Suspended states");
+
         return out;
     }
 
     private Map<String, Object> runStrategyDemo(List<Transaction> transactions) {
+        Map<String, Object> out = new LinkedHashMap<>();
+
+        // USAGE 1: Metrics Strategy (Existing)
         BigDecimal income = sumByType(transactions, TransactionType.INCOME);
         BigDecimal expense = sumByType(transactions, TransactionType.EXPENSE);
-
         MetricContext context = new MetricContext();
         Map<String, BigDecimal> metrics = new LinkedHashMap<>();
-
-        // strategy 1/3 usage
         context.setStrategy(new NetBalanceStrategy());
-        metrics.put(context.getStrategyName(), context.calculate(income, expense));
+        metrics.put("NetBalance", context.calculate(income, expense));
+        out.put("usage_1_metrics", metrics);
 
-        // strategy 2/3 usage
-        context.setStrategy(new SavingsRateStrategy());
-        metrics.put(context.getStrategyName(), context.calculate(income, expense));
+        // USAGE 2: Export Strategy
+        ExportContext exportCtx = new ExportContext(new JsonExportStrategy());
+        String expectedJson = exportCtx.executeExport("data123");
+        exportCtx.setStrategy(new CsvExportStrategy());
+        String expectedCsv = exportCtx.executeExport("data123");
+        out.put("usage_2_export", "Exported JSON and CSV strategies");
 
-        // strategy 3/3 usage
-        context.setStrategy(new ExpenseRatioStrategy());
-        metrics.put(context.getStrategyName(), context.calculate(income, expense));
+        // USAGE 3: Sort Strategy
+        SortContext sortCtx = new SortContext();
+        List<String> items = Arrays.asList("Z", "A", "C");
+        sortCtx.setStrategy(new AscendingSortStrategy());
+        sortCtx.executeSort(items);
+        sortCtx.setStrategy(new DescendingSortStrategy());
+        sortCtx.executeSort(items);
+        out.put("usage_3_sort", "Sorted Ascent/Descent");
 
-        return new LinkedHashMap<>(metrics);
+        return out;
     }
 
-    private Map<String, String> runTemplateDemo(User user, List<Transaction> transactions) {
-        Map<String, String> reports = new LinkedHashMap<>();
+    private Map<String, Object> runTemplateDemo(User user, List<Transaction> transactions) {
+        Map<String, Object> out = new LinkedHashMap<>();
 
-        // template 1/3 usage
-        reports.put("summary", new SummaryReportTemplate().generate(user, transactions));
-        // template 2/3 usage
-        reports.put("category", new CategoryReportTemplate().generate(user, transactions));
-        // template 3/3 usage
-        reports.put("monthly", new MonthlyReportTemplate().generate(user, transactions));
+        // USAGE 1: Report Generation (Existing)
+        out.put("usage_1_reports_summary", new SummaryReportTemplate().generate(user, transactions));
 
-        return reports;
+        // USAGE 2: Data Import
+        DataImportTemplate csvImport = new CsvImportProcessor();
+        csvImport.processImport();
+        out.put("usage_2_data_import", "CSV Import Pipeline Executed");
+
+        // USAGE 3: Notification Building
+        NotificationBuilderTemplate emailBuilder = new EmailAlertBuilder();
+        emailBuilder.buildAndSend();
+        out.put("usage_3_notification_builder", "Email Notification Pipeline Executed");
+
+        return out;
     }
 
-    private Map<String, String> runVisitorDemo(List<Transaction> transactions) {
+    private Map<String, Object> runVisitorDemo(List<Transaction> transactions) {
+        Map<String, Object> out = new LinkedHashMap<>();
+
+        // USAGE 1: Metrics Visitor (Existing)
         BigDecimal income = sumByType(transactions, TransactionType.INCOME);
         BigDecimal expense = sumByType(transactions, TransactionType.EXPENSE);
-        BigDecimal balance = income.subtract(expense);
-
-        List<MetricElement> elements = List.of(
-                new IncomeElement(income),
-                new ExpenseElement(expense),
-                new BalanceElement(balance)
-        );
-
-        Map<String, String> out = new LinkedHashMap<>();
-
-        // visitor 1/3 usage
+        List<MetricElement> elements = List.of(new IncomeElement(income), new ExpenseElement(expense));
         MetricsVisitor jsonVisitor = new JsonMetricsVisitor();
         elements.forEach(e -> e.accept(jsonVisitor));
-        out.put("json", jsonVisitor.result());
+        out.put("usage_1_metrics_visitor", jsonVisitor.result());
 
-        // visitor 2/3 usage
-        MetricsVisitor csvVisitor = new CsvMetricsVisitor();
-        elements.forEach(e -> e.accept(csvVisitor));
-        out.put("csv", csvVisitor.result());
+        // USAGE 2: Audit Visitor
+        AuditVisitor auditVisitor = new BasicAuditVisitor();
+        new UserAudit("testUser").accept(auditVisitor);
+        new TransactionAudit(100.0).accept(auditVisitor);
+        out.put("usage_2_audit", "Basic Audit Executed");
 
-        // visitor 3/3 usage
-        MetricsVisitor humanVisitor = new HumanReadableVisitor();
-        elements.forEach(e -> e.accept(humanVisitor));
-        out.put("human", humanVisitor.result());
+        // USAGE 3: Tax Visitor
+        TaxVisitor taxVisitor = new FlatTaxVisitor();
+        new IncomeTaxable(1000).applyTax(taxVisitor);
+        new ExpenseTaxable(200).applyTax(taxVisitor);
+        out.put("usage_3_tax", "Flat Tax Calculation Executed");
 
         return out;
     }
