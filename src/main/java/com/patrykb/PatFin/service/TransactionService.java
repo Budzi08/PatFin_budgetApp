@@ -2,10 +2,6 @@ package com.patrykb.PatFin.service;
 
 import com.patrykb.PatFin.dto.TransactionDto;
 import com.patrykb.PatFin.model.Transaction;
-import com.patrykb.PatFin.pattern.interpreter.AmountGreaterExpression;
-import com.patrykb.PatFin.pattern.interpreter.AndExpression;
-import com.patrykb.PatFin.pattern.interpreter.TransactionExpression;
-import com.patrykb.PatFin.pattern.interpreter.TypeExpression;
 import com.patrykb.PatFin.pattern.mediator.PatFinMediator;
 import com.patrykb.PatFin.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,56 +16,27 @@ import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.List;
 
+
 @Service
 public class TransactionService {
-
-    interface TransactionFactory {
-        Transaction create(BigDecimal amount, String description, LocalDate date,
-                          Category category, User user);
-    }
-
-    static class IncomeFactory implements TransactionFactory {
-        @Override
-        public Transaction create(BigDecimal amount, String description, LocalDate date,
-                                  Category category, User user) {
-            return Transaction.builder()
-                    .amount(amount.abs())
-                    .description(description)
-                    .date(date)
-                    .type(TransactionType.INCOME)
-                    .category(category)
-                    .user(user)
-                    .build();
-        }
-    }
-
-    static class ExpenseFactory implements TransactionFactory {
-        @Override
-        public Transaction create(BigDecimal amount, String description, LocalDate date,
-                                  Category category, User user) {
-            return Transaction.builder()
-                    .amount(amount.abs())
-                    .description(description)
-                    .date(date)
-                    .type(TransactionType.EXPENSE)
-                    .category(category)
-                    .user(user)
-                    .build();
-        }
-    }
-
-    private TransactionFactory getFactory(TransactionType type) {
-        return switch (type) {
-            case INCOME -> new IncomeFactory();
-            case EXPENSE -> new ExpenseFactory();
-        };
-    }
 
     @Autowired
     private TransactionRepository transactionRepository;
 
     @Autowired
     private CategoryService categoryService;
+
+    // SRP: tworzenie transakcji delegowane do dedykowanej klasy
+    @Autowired
+    private TransactionFactory transactionFactory;
+
+    // SRP: filtrowanie wyników delegowane do dedykowanej klasy
+    @Autowired
+    private TransactionFilterService transactionFilterService;
+
+    // L5 Mediator #2
+    @Autowired
+    private PatFinMediator mediator;
 
     public List<Transaction> findAll() {
         return transactionRepository.findAll();
@@ -79,19 +46,16 @@ public class TransactionService {
         return transactionRepository.findAllByUser(user);
     }
 
-    // L5 Mediator #2
-    @Autowired
-    private PatFinMediator mediator;
-
     public Transaction save(TransactionDto dto, User user) {
         Category category = null;
         if (dto.getCategoryId() != null) {
             category = categoryService.findById(dto.getCategoryId());
         }
 
-        TransactionFactory factory = getFactory(dto.getType());
-        Transaction transaction = factory.create(
-                dto.getAmount(), dto.getDescription(), dto.getDate(), category, user);
+        // SRP: delegujemy tworzenie obiektu do TransactionFactory
+        Transaction transaction = transactionFactory.create(
+                dto.getType(), dto.getAmount(), dto.getDescription(),
+                dto.getDate(), category, user);
 
         Transaction saved = transactionRepository.save(transaction);
         AuditLogger.INSTANCE.logTransaction(user.getEmail(), "CREATE", saved.getId());
@@ -110,54 +74,24 @@ public class TransactionService {
     }
 
     public List<Transaction> findAllByUserWithFilters(User user, LocalDate startDate, LocalDate endDate,
-                                                    BigDecimal minAmount, BigDecimal maxAmount,
-                                                    TransactionType type, Long categoryId) {
+                                                      BigDecimal minAmount, BigDecimal maxAmount,
+                                                      TransactionType type, Long categoryId) {
 
         List<Transaction> transactions = transactionRepository.findTransactionsWithFilters(
-            user, startDate, endDate, minAmount, maxAmount, type, categoryId);
-        
+                user, startDate, endDate, minAmount, maxAmount, type, categoryId);
 
-//        return transactions.stream()
-//            .filter(t -> startDate == null || !t.getDate().isBefore(startDate))
-//            .filter(t -> endDate == null || !t.getDate().isAfter(endDate))
-//            .filter(t -> minAmount == null || t.getAmount().compareTo(minAmount) >= 0)
-//            .filter(t -> maxAmount == null || t.getAmount().compareTo(maxAmount) <= 0)
-//            .filter(t -> type == null || t.getType().equals(type))
-//            .filter(t -> categoryId == null || (t.getCategory() != null && t.getCategory().getId().equals(categoryId)))
-//            .collect(java.util.stream.Collectors.toList());
-
-        // L5 Interpreter #1, #2, #3
-        TransactionExpression filter = t -> true; // Domyślnie przepuszczaj wszystko
-
-        if (minAmount != null) {
-            filter = new AndExpression(filter, new AmountGreaterExpression(minAmount));
-        }
-        if (type != null) {
-            filter = new AndExpression(filter, new TypeExpression(type));
-        }
-
-        final TransactionExpression finalFilter = filter;
-        return transactions.stream()
-                .filter(finalFilter::interpret)
-                .collect(java.util.stream.Collectors.toList());
-
+        // SRP: delegujemy filtrowanie do TransactionFilterService
+        return transactionFilterService.filter(transactions, minAmount, type);
     }
 
     public void deleteById(Long id, User user) {
         transactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        
-            /* 
-        if (!transaction.getUser().equals(user)) {
-            throw new RuntimeException("Unauthorized to delete this transaction");
-        }
-            */
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-//        AuditLogger.INSTANCE.logTransaction(user.getEmail(), "DELETE", id);
         transactionRepository.deleteById(id);
 
         // L5 Mediator #2 Reakcja na usunięcie
         mediator.notify(this, "TRANSACTION_DELETED");
     }
-
 }
+
