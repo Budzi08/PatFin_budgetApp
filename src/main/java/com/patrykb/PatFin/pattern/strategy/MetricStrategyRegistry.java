@@ -33,7 +33,7 @@ public class MetricStrategyRegistry {
 
     /**
      * Zwraca wszystkie dostępne nazwy metryk.
-     * Sterowane danymi – lista pochodzi z METRIC_CONFIG, nie z hardkodowanych stringów.
+     * Sterowane danymi – lista pochodzi z METRIC_CONFIG
      */
     public static Iterable<String> availableMetrics() {
         return METRIC_CONFIG.keySet();
