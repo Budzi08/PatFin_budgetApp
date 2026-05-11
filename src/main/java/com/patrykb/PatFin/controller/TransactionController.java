@@ -34,6 +34,9 @@ import com.patrykb.PatFin.pattern.decorator.ExportWriter;
 import com.patrykb.PatFin.pattern.decorator.SimpleExportWriter;
 import com.patrykb.PatFin.pattern.decorator.HtmlExportWriterDecorator;
 import com.patrykb.PatFin.pattern.proxy.SecurityTransactionProxy;
+import com.patrykb.PatFin.tydzien8.DescriptionFormatter;
+import com.patrykb.PatFin.tydzien8.UpperCaseDescriptionFormatter;
+import com.patrykb.PatFin.tydzien8.zad2.TransactionNotifier;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -63,11 +66,25 @@ public class TransactionController {
         return transactionService.findAllByUser(user);
     }
 
+    @Autowired
+    private TransactionNotifier notifier;
+
     @PostMapping
-    public Transaction addTransaction(@RequestBody TransactionDto dto) {
+    public Transaction addTransaction(@RequestBody TransactionDto dto, @RequestParam(required = false, defaultValue = "false") boolean UpperCaseFormat) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
+
+        DescriptionFormatter formatter; //zmienna typu bazowego
+        if (UpperCaseFormat) {
+            formatter = new UpperCaseDescriptionFormatter(); // Typ pochodny
+        } else {
+            formatter = new DescriptionFormatter();     // Typ bazowy
+        }
+
+        if (dto.getDescription() != null) {
+            dto.setDescription(formatter.format(dto.getDescription()));
+        }
 
 //        //Transaction saved = transactionService.save(dto, user);
 //        //WZORZEC Facade użycie 2 - rejestracja transakcji wraz z weryfikacją kategorii i automatycznym audytem
@@ -85,7 +102,14 @@ public class TransactionController {
         RegisterTransactionCommand regCommand = new RegisterTransactionCommand(financialFacade, dto, user);
         regCommand.execute();
 
-        return regCommand.getResult();
+        Transaction savedTransaction = regCommand.getResult();
+
+        // progi kwotowe i logika powiadomień są ukryte w implementacji
+        if (notifier.isApplicable(savedTransaction)) {
+            notifier.notifyUser(savedTransaction);
+        }
+
+        return savedTransaction;
     }
 
     @GetMapping("/export")

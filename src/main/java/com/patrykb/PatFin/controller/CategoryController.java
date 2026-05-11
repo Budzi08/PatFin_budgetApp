@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import com.patrykb.PatFin.pattern.composite.BudgetGroup;
 import com.patrykb.PatFin.pattern.composite.CategoryBudget;
 import com.patrykb.PatFin.pattern.proxy.AuditCategoryProxy;
-
+import com.patrykb.PatFin.tydzien8.zad2.CategoryValidator;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -57,12 +57,21 @@ public class CategoryController {
         return categories;
     }
 
+
+    @Autowired
+    private CategoryValidator categoryValidator;
+
+    
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public Category add(@RequestBody Category category) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) auth.getPrincipal();
         //return categoryService.save(category);
+        
+        //wywołanie walidatora - kontroler nie widzi szczegółów implementacji
+        categoryValidator.validate(category);
+
         // WZORZEC: Proxy - automatyczne logowanie przy tworzeniu kategorii przez administratora
         return auditProxy.saveAndAudit(category, email);
     }

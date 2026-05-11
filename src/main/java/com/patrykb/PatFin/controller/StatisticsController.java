@@ -6,6 +6,8 @@ import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.service.StatisticsService;
 import com.patrykb.PatFin.service.TransactionService;
 import com.patrykb.PatFin.service.UserService;
+import com.patrykb.PatFin.tydzien8.MonthlyReportTitleGenerator;
+import com.patrykb.PatFin.tydzien8.ReportTitleGenerator;
 import com.patrykb.PatFin.model.enums.TransactionType;
 import com.patrykb.PatFin.config.CurrencyFormatter;
 import com.patrykb.PatFin.config.AppConfig;
@@ -35,6 +37,8 @@ import com.patrykb.PatFin.pattern.composite.TextSection;
 import com.patrykb.PatFin.pattern.bridge.Report;
 import com.patrykb.PatFin.pattern.bridge.FinancialReport;
 import com.patrykb.PatFin.pattern.bridge.JsonFormatter;
+import com.patrykb.PatFin.tydzien8.AmountProvider;
+import com.patrykb.PatFin.tydzien8.RoundedAmountProvider;
 
 @RestController
 @RequestMapping("/api/statistics")
@@ -199,12 +203,24 @@ public class StatisticsController {
 
     // NOWY ENDPOINT - raport JSON z fragmentów raportu
     @GetMapping("/full-report")
-    public String getFullReport() {
+    public String getFullReport(@RequestParam(required = false) boolean useMonthlyTitle) {
         User user = getCurrentUser();
         StatisticsDto.OverallStats stats = statisticsService.getOverallStats(user);
 
+        // ZASADA PODSTAWIENIA LISKOV
+        // Zmienna 'titleGenerator' jest typu bazowego (ReportTitleGenerator)
+        // Przypisujemy do niej obiekt klasy bazowej lub pochodnej (MonthlyReportTitleGenerator)
+        ReportTitleGenerator titleGenerator;
+        if (useMonthlyTitle) {
+            titleGenerator = new MonthlyReportTitleGenerator(); // Typ pochodny
+        } else {
+            titleGenerator = new ReportTitleGenerator(); // Typ bazowy
+ 
+        }
         // WZORZEC: Composite (Use 2) - Budowanie raportu
         CompositeReportSection mainReport = new CompositeReportSection();
+        // dodanie tytulu do raportu
+        mainReport.addSection(new TextSection("Tytuł Raportu: " + titleGenerator.generateTitle()));
         mainReport.addSection(new TextSection("Przychody całkowite: " + stats.getTotalIncome()));
         mainReport.addSection(new TextSection("Wydatki całkowite: " + stats.getTotalExpenses()));
         mainReport.addSection(new TextSection("Bilans końcowy: " + stats.getCurrentBalance()));
@@ -325,12 +341,21 @@ public class StatisticsController {
     }
 
     @GetMapping("/by-category-all")
-    public Map<String, Map<String, BigDecimal>> getByCategoryAll() {
+    public Map<String, Map<String, BigDecimal>> getByCategoryAll(@RequestParam(required = false, defaultValue = "false") boolean roundedStats) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
         User user = userService.findByEmail(email);
 
         List<Transaction> transactions = transactionService.findAllByUser(user);
+
+        // Deklarujemy zmienną typu bazowego
+        AmountProvider amountProvider;
+        if (roundedStats) {
+            amountProvider = new RoundedAmountProvider(); // Podstawienie typu pochodnego
+        } else {
+            amountProvider = new AmountProvider();        // Standardowy typ bazowy
+        }
+
 
         Map<String, Map<String, BigDecimal>> result = new HashMap<>();
 
@@ -340,7 +365,9 @@ public class StatisticsController {
             Map<String, BigDecimal> map = result.get(category);
 
             String type = t.getType().toString().toLowerCase();
-            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
+
+            BigDecimal amountToAdd = amountProvider.getAmount(t);
+            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(amountToAdd));
         });
 
         return result;

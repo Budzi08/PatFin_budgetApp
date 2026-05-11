@@ -16,6 +16,7 @@ import com.patrykb.PatFin.pattern.decorator.NotificationSender;
 import com.patrykb.PatFin.pattern.facade.UserOnboardingFacade;
 import com.patrykb.PatFin.pattern.decorator.BasicNotificationSender;
 import com.patrykb.PatFin.pattern.decorator.LoggingNotificationDecorator;
+import com.patrykb.PatFin.tydzien8.zad2.LoginMonitor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -72,8 +73,15 @@ public class AuthController {
         }
     }
 
+    @Autowired
+    private LoginMonitor loginMonitor;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        // Analizujemy próbę logowania przez interfejs
+        loginMonitor.checkLoginAttempt(loginRequest.getEmail());
+
+
         User user = userService.findByEmail(loginRequest.getEmail());
         if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body(ResponseFactory.error("Invalid email or password"));
