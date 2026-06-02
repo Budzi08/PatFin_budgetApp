@@ -9,4 +9,9 @@ public class LogTransactionNotifier extends AbstractTransactionNotifier {
         String msg = buildAlertMessage(transaction);
         System.out.println("[Transaction Notifier LOG] " + msg);
     }
+
+    @Override
+    public boolean isApplicable(Transaction transaction) {
+        return true;
+    }
 }

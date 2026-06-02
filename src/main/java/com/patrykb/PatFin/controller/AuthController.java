@@ -1,22 +1,21 @@
 package com.patrykb.PatFin.controller;
 
+import com.patrykb.PatFin.config.AuditLogger;
+import com.patrykb.PatFin.dto.RegisterRequest;
+import com.patrykb.PatFin.model.User;
 import com.patrykb.PatFin.pattern.command.UserOnboardingCommand;
+import com.patrykb.PatFin.pattern.facade.UserOnboardingFacade;
 import com.patrykb.PatFin.security.JwtUtil;
 import com.patrykb.PatFin.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.patrykb.PatFin.model.User;
-import com.patrykb.PatFin.dto.RegisterRequest;
-import com.patrykb.PatFin.config.AuditLogger;
-
-import com.patrykb.PatFin.pattern.adapter.ExternalAuthRequest;
-import com.patrykb.PatFin.pattern.adapter.RegisterRequestAuthAdapter;
-import com.patrykb.PatFin.pattern.decorator.NotificationSender;
-import com.patrykb.PatFin.pattern.facade.UserOnboardingFacade;
-import com.patrykb.PatFin.pattern.decorator.BasicNotificationSender;
-import com.patrykb.PatFin.pattern.decorator.LoggingNotificationDecorator;
 import com.patrykb.PatFin.tydzien8.zad2.LoginMonitor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -78,14 +77,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // Analizujemy próbę logowania przez interfejs
+        // Przywrócony Twój poprawny kod sprawdzania logowania:
         loginMonitor.checkLoginAttempt(loginRequest.getEmail());
 
-
         User user = userService.findByEmail(loginRequest.getEmail());
+
+        // 1. MIEJSCE: Niepoprawne dane uwierzytelniające
+        // Tydzień 9 STARY KOD, dodaj zwracanie wyjątków zamiast kodów błędów
+        /*
         if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body(ResponseFactory.error("Invalid email or password"));
         }
+        */
+        // Tydzień 9 ZAD6.1 rzucenie wyjątku HTTP 401 Unauthorized zamiast ręcznego zwaracania statusu błędu
+        if (user == null || !userService.checkPassword(loginRequest.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.isAdmin());
         AuditLogger.INSTANCE.logAuth(user.getEmail(), "LOGIN");
         return ResponseEntity.ok(ResponseFactory.jwt(token));

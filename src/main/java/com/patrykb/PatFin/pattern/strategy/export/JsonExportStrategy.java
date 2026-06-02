@@ -1,4 +1,4 @@
-﻿package com.patrykb.PatFin.pattern.strategy.export;
+package com.patrykb.PatFin.pattern.strategy.export;
 
 public class JsonExportStrategy implements ExportStrategy {
     @Override
