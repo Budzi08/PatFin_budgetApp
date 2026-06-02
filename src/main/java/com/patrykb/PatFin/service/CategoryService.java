@@ -8,7 +8,9 @@ import com.patrykb.PatFin.repository.CategoryRepository;
 import com.patrykb.PatFin.config.AuditLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +30,15 @@ public class CategoryService {
     }
 
     public Category findById(Long id) {
+        // Tydzień 9 STARY KOD, dodaj zwracanie wyjątków zamiast kodów błędów
+        /*
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
+        */
+
+        // Tydzień 9 ZAD6.2 rzucenie wyjątku HTTP 404 Not Found zamiast ogólnego RuntimeException
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
     }
 
     public Category save(Category category) {

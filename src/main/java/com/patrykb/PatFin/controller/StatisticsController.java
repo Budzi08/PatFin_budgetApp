@@ -60,62 +60,107 @@ public class StatisticsController {
     @Autowired
     private ExecutionTimingProxy timingProxy;
 
-    @GetMapping("/summary")
-    public Map<String, BigDecimal> getSummary(
-            @RequestParam(required = false) String period,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userService.findByEmail(email);
-
+    // Tydzień 9 Utworzenie metody pomocniczej do ZAD2.1
+    private List<Transaction> fetchFilteredTransactions(String period, String startDate, String endDate) {
+        User user = getCurrentUser();
         LocalDate start = null;
         LocalDate end = LocalDate.now();
 
         if (period != null && !period.isEmpty()) {
             switch (period) {
-                case "1month":
-                    start = LocalDate.now().minusMonths(1);
-                    break;
-                case "3months":
-                    start = LocalDate.now().minusMonths(3);
-                    break;
-                case "6months":
-                    start = LocalDate.now().minusMonths(6);
-                    break;
-                case "1year":
-                    start = LocalDate.now().minusYears(1);
-                    break;
+                case "1month": start = LocalDate.now().minusMonths(1); break;
+                case "3months": start = LocalDate.now().minusMonths(3); break;
+                case "6months": start = LocalDate.now().minusMonths(6); break;
+                case "1year": start = LocalDate.now().minusYears(1); break;
             }
         } else if (startDate != null && endDate != null) {
             start = LocalDate.parse(startDate);
             end = LocalDate.parse(endDate);
         }
 
-        List<Transaction> transactions;
-        if (start != null) {
-            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
-        } else {
-            transactions = transactionService.findAllByUser(user);
-        }
+        return start != null ? transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null)
+                : transactionService.findAllByUser(user);
+    }
 
-        BigDecimal income = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // Tydzień 9 STARY KOD, dostosuj długości 3 dowolnych metod w programie, żeby nie miały więcej niż 20 linii.
+//    @GetMapping("/summary")
+//    public Map<String, BigDecimal> getSummary(
+//            @RequestParam(required = false) String period,
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = (String) authentication.getPrincipal();
+//        User user = userService.findByEmail(email);
+//
+//        LocalDate start = null;
+//        LocalDate end = LocalDate.now();
+//
+//        if (period != null && !period.isEmpty()) {
+//            switch (period) {
+//                case "1month":
+//                    start = LocalDate.now().minusMonths(1);
+//                    break;
+//                case "3months":
+//                    start = LocalDate.now().minusMonths(3);
+//                    break;
+//                case "6months":
+//                    start = LocalDate.now().minusMonths(6);
+//                    break;
+//                case "1year":
+//                    start = LocalDate.now().minusYears(1);
+//                    break;
+//            }
+//        } else if (startDate != null && endDate != null) {
+//            start = LocalDate.parse(startDate);
+//            end = LocalDate.parse(endDate);
+//        }
+//
+//        List<Transaction> transactions;
+//        if (start != null) {
+//            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
+//        } else {
+//            transactions = transactionService.findAllByUser(user);
+//        }
+//
+//        BigDecimal income = transactions.stream()
+//                .filter(t -> t.getType() == TransactionType.INCOME)
+//                .map(Transaction::getAmount)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        BigDecimal expense = transactions.stream()
+//                .filter(t -> t.getType() == TransactionType.EXPENSE)
+//                .map(Transaction::getAmount)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        Map<String, BigDecimal> summary = new HashMap<>();
+//        summary.put("income", income);
+//        summary.put("expense", expense);
+//        summary.put("balance", income.subtract(expense));
+//        summary.put("totalTransactions", new BigDecimal(transactions.size()));
+//
+//        return summary;
+//    }
 
-        BigDecimal expense = transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // Tydzień 9 ZAD 2.1 skrócenie metody do poniżej 20 linii
+    @GetMapping("/summary")
+    public Map<String, BigDecimal> getSummary(
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+
+        List<Transaction> transactions = fetchFilteredTransactions(period, startDate, endDate);
+
+        BigDecimal income = transactions.stream().filter(t -> t.getType() == TransactionType.INCOME)
+                .map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal expense = transactions.stream().filter(t -> t.getType() == TransactionType.EXPENSE)
+                .map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Map<String, BigDecimal> summary = new HashMap<>();
         summary.put("income", income);
         summary.put("expense", expense);
         summary.put("balance", income.subtract(expense));
-        summary.put("totalTransactions", new BigDecimal(transactions.size()));
-
+        summary.put("transactionCount", new BigDecimal(transactions.size()));
         return summary;
     }
 
@@ -201,140 +246,212 @@ public class StatisticsController {
         return chartDataList;
     }
 
-    // NOWY ENDPOINT - raport JSON z fragmentów raportu
+//    // NOWY ENDPOINT - raport JSON z fragmentów raportu
+//    @GetMapping("/full-report")
+//    public String getFullReport(@RequestParam(required = false) boolean useMonthlyTitle) {
+//        User user = getCurrentUser();
+//        StatisticsDto.OverallStats stats = statisticsService.getOverallStats(user);
+//
+//        // ZASADA PODSTAWIENIA LISKOV
+//        // Zmienna 'titleGenerator' jest typu bazowego (ReportTitleGenerator)
+//        // Przypisujemy do niej obiekt klasy bazowej lub pochodnej (MonthlyReportTitleGenerator)
+//        ReportTitleGenerator titleGenerator;
+//        if (useMonthlyTitle) {
+//            titleGenerator = new MonthlyReportTitleGenerator(); // Typ pochodny
+//        } else {
+//            titleGenerator = new ReportTitleGenerator(); // Typ bazowy
+//
+//        }
+//        // WZORZEC: Composite (Use 2) - Budowanie raportu
+//        CompositeReportSection mainReport = new CompositeReportSection();
+//        // dodanie tytulu do raportu
+//        mainReport.addSection(new TextSection("Tytuł Raportu: " + titleGenerator.generateTitle()));
+//        mainReport.addSection(new TextSection("Przychody całkowite: " + stats.getTotalIncome()));
+//        mainReport.addSection(new TextSection("Wydatki całkowite: " + stats.getTotalExpenses()));
+//        mainReport.addSection(new TextSection("Bilans końcowy: " + stats.getCurrentBalance()));
+//
+//        // WZORZEC: Bridge (Use 1) - wymsuzenie formatu
+//        Report report = new FinancialReport(new JsonFormatter(), mainReport.render());
+//        return report.generate();
+//    }
+
+    // Tydzień 9 ZAD4.1 dostosuj 3 funkcje tak by były tylko na jednym poziomie abstrakcji
     @GetMapping("/full-report")
     public String getFullReport(@RequestParam(required = false) boolean useMonthlyTitle) {
-        User user = getCurrentUser();
-        StatisticsDto.OverallStats stats = statisticsService.getOverallStats(user);
+        StatisticsDto.OverallStats stats = fetchUserStatistics();
+        CompositeReportSection reportContent = buildReportContent(stats, useMonthlyTitle);
+        return generateFormattedReport(reportContent);
+    }
 
-        // ZASADA PODSTAWIENIA LISKOV
-        // Zmienna 'titleGenerator' jest typu bazowego (ReportTitleGenerator)
-        // Przypisujemy do niej obiekt klasy bazowej lub pochodnej (MonthlyReportTitleGenerator)
-        ReportTitleGenerator titleGenerator;
-        if (useMonthlyTitle) {
-            titleGenerator = new MonthlyReportTitleGenerator(); // Typ pochodny
-        } else {
-            titleGenerator = new ReportTitleGenerator(); // Typ bazowy
- 
-        }
-        // WZORZEC: Composite (Use 2) - Budowanie raportu
+    private StatisticsDto.OverallStats fetchUserStatistics() {
+        User user = getCurrentUser();
+        return statisticsService.getOverallStats(user);
+    }
+
+    private CompositeReportSection buildReportContent(StatisticsDto.OverallStats stats, boolean useMonthlyTitle) {
         CompositeReportSection mainReport = new CompositeReportSection();
-        // dodanie tytulu do raportu
-        mainReport.addSection(new TextSection("Tytuł Raportu: " + titleGenerator.generateTitle()));
+        mainReport.addSection(new TextSection("Tytuł Raportu: " + determineTitle(useMonthlyTitle)));
         mainReport.addSection(new TextSection("Przychody całkowite: " + stats.getTotalIncome()));
         mainReport.addSection(new TextSection("Wydatki całkowite: " + stats.getTotalExpenses()));
-        mainReport.addSection(new TextSection("Bilans końcowy: " + stats.getCurrentBalance()));
+        return mainReport;
+    }
 
-        // WZORZEC: Bridge (Use 1) - wymsuzenie formatu
-        Report report = new FinancialReport(new JsonFormatter(), mainReport.render());
+    private String determineTitle(boolean useMonthlyTitle) {
+        ReportTitleGenerator titleGenerator = useMonthlyTitle ? new MonthlyReportTitleGenerator() : new ReportTitleGenerator();
+        return titleGenerator.generateTitle();
+    }
+
+    private String generateFormattedReport(CompositeReportSection reportContent) {
+        Report report = new FinancialReport(new JsonFormatter(), reportContent.render());
         return report.generate();
     }
 
+// Tydzień 9 STARY KOD, dostosuj długości 3 dowolnych metod w programie, żeby nie miały więcej niż 20 linii.
+//    @GetMapping("/monthly")
+//    public Map<String, Map<String, BigDecimal>> getMonthlySummary(
+//            @RequestParam(required = false) String period,
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = (String) authentication.getPrincipal();
+//        User user = userService.findByEmail(email);
+//
+//        LocalDate start = null;
+//        LocalDate end = LocalDate.now();
+//
+//        if (period != null && !period.isEmpty()) {
+//            switch (period) {
+//                case "1month":
+//                    start = LocalDate.now().minusMonths(1);
+//                    break;
+//                case "3months":
+//                    start = LocalDate.now().minusMonths(3);
+//                    break;
+//                case "6months":
+//                    start = LocalDate.now().minusMonths(6);
+//                    break;
+//                case "1year":
+//                    start = LocalDate.now().minusYears(1);
+//                    break;
+//            }
+//        } else if (startDate != null && endDate != null) {
+//            start = LocalDate.parse(startDate);
+//            end = LocalDate.parse(endDate);
+//        }
+//
+//        List<Transaction> transactions;
+//        if (start != null) {
+//            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
+//        } else {
+//            transactions = transactionService.findAllByUser(user);
+//        }
+//
+//        Map<String, Map<String, BigDecimal>> result = new HashMap<>();
+//
+//        transactions.forEach(t -> {
+//            String month = t.getDate().getYear() + "-" + String.format("%02d", t.getDate().getMonthValue());
+//            result.putIfAbsent(month, new HashMap<>());
+//            Map<String, BigDecimal> map = result.get(month);
+//
+//            String type = t.getType().toString().toLowerCase();
+//            BigDecimal amount = t.getAmount();
+//
+//            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(amount));
+//        });
+//
+//        return result;
+//    }
+
+    // Tydzień 9 ZAD2.2 dostosuj długości 3 dowolnych metod w programie, żeby nie miały więcej niż 20 linii.
     @GetMapping("/monthly")
     public Map<String, Map<String, BigDecimal>> getMonthlySummary(
             @RequestParam(required = false) String period,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userService.findByEmail(email);
-
-        LocalDate start = null;
-        LocalDate end = LocalDate.now();
-
-        if (period != null && !period.isEmpty()) {
-            switch (period) {
-                case "1month":
-                    start = LocalDate.now().minusMonths(1);
-                    break;
-                case "3months":
-                    start = LocalDate.now().minusMonths(3);
-                    break;
-                case "6months":
-                    start = LocalDate.now().minusMonths(6);
-                    break;
-                case "1year":
-                    start = LocalDate.now().minusYears(1);
-                    break;
-            }
-        } else if (startDate != null && endDate != null) {
-            start = LocalDate.parse(startDate);
-            end = LocalDate.parse(endDate);
-        }
-
-        List<Transaction> transactions;
-        if (start != null) {
-            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
-        } else {
-            transactions = transactionService.findAllByUser(user);
-        }
-
+        List<Transaction> transactions = fetchFilteredTransactions(period, startDate, endDate);
         Map<String, Map<String, BigDecimal>> result = new HashMap<>();
 
         transactions.forEach(t -> {
             String month = t.getDate().getYear() + "-" + String.format("%02d", t.getDate().getMonthValue());
             result.putIfAbsent(month, new HashMap<>());
-            Map<String, BigDecimal> map = result.get(month);
-
             String type = t.getType().toString().toLowerCase();
-            BigDecimal amount = t.getAmount();
-
-            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(amount));
+            result.get(month).put(type, result.get(month).getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
         });
 
         return result;
     }
+// Tydzień 9 STARY KOD, dostosuj długości 3 dowolnych metod w programie, żeby nie miały więcej niż 20 linii.
+//    @GetMapping("/by-category")
+//    public Map<String, Map<String, BigDecimal>> getByCategory(
+//            @RequestParam(required = false) String period,
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = (String) authentication.getPrincipal();
+//        User user = userService.findByEmail(email);
+//
+//        LocalDate start = null;
+//        LocalDate end = LocalDate.now();
+//
+//        if (period != null && !period.isEmpty()) {
+//            switch (period) {
+//                case "1month":
+//                    start = LocalDate.now().minusMonths(1);
+//                    break;
+//                case "3months":
+//                    start = LocalDate.now().minusMonths(3);
+//                    break;
+//                case "6months":
+//                    start = LocalDate.now().minusMonths(6);
+//                    break;
+//                case "1year":
+//                    start = LocalDate.now().minusYears(1);
+//                    break;
+//            }
+//        } else if (startDate != null && endDate != null) {
+//            start = LocalDate.parse(startDate);
+//            end = LocalDate.parse(endDate);
+//        }
+//
+//        List<Transaction> transactions;
+//        if (start != null) {
+//            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
+//        } else {
+//            transactions = transactionService.findAllByUser(user);
+//        }
+//
+//        Map<String, Map<String, BigDecimal>> result = new HashMap<>();
+//
+//        transactions.forEach(t -> {
+//            String category = (t.getCategory() != null) ? t.getCategory().getName() : "Brak kategorii";
+//            result.putIfAbsent(category, new HashMap<>());
+//            Map<String, BigDecimal> map = result.get(category);
+//
+//            String type = t.getType().toString().toLowerCase();
+//            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
+//        });
+//
+//        return result;
+//    }
 
+    // Tydzień 9 ZAD2.3 dostosuj długości 3 dowolnych metod w programie, żeby nie miały więcej niż 20 linii.
     @GetMapping("/by-category")
     public Map<String, Map<String, BigDecimal>> getByCategory(
             @RequestParam(required = false) String period,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userService.findByEmail(email);
-
-        LocalDate start = null;
-        LocalDate end = LocalDate.now();
-
-        if (period != null && !period.isEmpty()) {
-            switch (period) {
-                case "1month":
-                    start = LocalDate.now().minusMonths(1);
-                    break;
-                case "3months":
-                    start = LocalDate.now().minusMonths(3);
-                    break;
-                case "6months":
-                    start = LocalDate.now().minusMonths(6);
-                    break;
-                case "1year":
-                    start = LocalDate.now().minusYears(1);
-                    break;
-            }
-        } else if (startDate != null && endDate != null) {
-            start = LocalDate.parse(startDate);
-            end = LocalDate.parse(endDate);
-        }
-
-        List<Transaction> transactions;
-        if (start != null) {
-            transactions = transactionService.findAllByUserWithFilters(user, start, end, null, null, null, null);
-        } else {
-            transactions = transactionService.findAllByUser(user);
-        }
-
+        List<Transaction> transactions = fetchFilteredTransactions(period, startDate, endDate);
         Map<String, Map<String, BigDecimal>> result = new HashMap<>();
 
         transactions.forEach(t -> {
-            String category = (t.getCategory() != null) ? t.getCategory().getName() : "Brak kategorii";
+            String category = t.getCategory() != null ? t.getCategory().getName() : "Brak kategorii";
             result.putIfAbsent(category, new HashMap<>());
-            Map<String, BigDecimal> map = result.get(category);
-
             String type = t.getType().toString().toLowerCase();
-            map.put(type, map.getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
+            result.get(category).put(type, result.get(category).getOrDefault(type, BigDecimal.ZERO).add(t.getAmount()));
         });
 
         return result;

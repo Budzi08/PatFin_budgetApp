@@ -1,6 +1,7 @@
 package com.patrykb.PatFin.model;
 
 import com.patrykb.PatFin.model.enums.TransactionType;
+import com.patrykb.PatFin.dto.TransactionDto;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,13 +30,23 @@ public class Transaction implements Cloneable {
 
     public Transaction() {
     }
+// Tydzień 9 STARY KOD, dostosuj 3 funkcje tak, by przyjmowały maksymalnie 3 argumenty - 3 pkt.
+//    public Transaction(BigDecimal amount, String description, LocalDate date, TransactionType type, Category category,
+//            User user) {
+//        this.amount = amount;
+//        this.description = description;
+//        this.date = date;
+//        this.type = type;
+//        this.category = category;
+//        this.user = user;
+//    }
 
-    public Transaction(BigDecimal amount, String description, LocalDate date, TransactionType type, Category category,
-            User user) {
-        this.amount = amount;
-        this.description = description;
-        this.date = date;
-        this.type = type;
+    // Tydzień 9 ZAD5.1 wprowadzono obiekt parametru (TransactionDto) w celu redukcji liczby argumentów z 6 do 3.
+    public Transaction(TransactionDto dto, Category category, User user) {
+        this.amount = dto.getAmount();
+        this.description = dto.getDescription();
+        this.date = dto.getDate();
+        this.type = dto.getType();
         this.category = category;
         this.user = user;
     }
