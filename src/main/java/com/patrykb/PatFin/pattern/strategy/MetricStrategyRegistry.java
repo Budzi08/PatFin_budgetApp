@@ -7,7 +7,7 @@ import java.util.Map;
 public class MetricStrategyRegistry {
 
     /**
-     * "Dane sterujące" – konfiguracja dostępnych metryk.
+     * Dane sterujące – konfiguracja dostępnych metryk.
      * Dodanie nowej metryki = dodanie wpisu tutaj
      * */
     private static final Map<String, MetricStrategy> METRIC_CONFIG = new LinkedHashMap<>();
@@ -32,8 +32,7 @@ public class MetricStrategyRegistry {
     }
 
     /**
-     * Zwraca wszystkie dostępne nazwy metryk.
-     * Sterowane danymi – lista pochodzi z METRIC_CONFIG
+     * Sterowane danymi METRIC_CONFIG
      */
     public static Iterable<String> availableMetrics() {
         return METRIC_CONFIG.keySet();

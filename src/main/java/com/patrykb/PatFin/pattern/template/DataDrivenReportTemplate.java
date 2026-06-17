@@ -11,9 +11,8 @@ import java.util.function.Function;
 public class DataDrivenReportTemplate {
 
     /**
-     * Kontrakt sekcji raportu – każda sekcja to funkcja (User, List<Transaction>) → String.
-     * Nowa sekcja = nowa implementacja tego interfejsu; DataDrivenReportTemplate nie wie
-     * nic o jej istnieniu.
+     * Kontrakt sekcji raportu – każda sekcja to funkcja
+     * Nowa sekcja = nowa implementacja tego interfejsu
      */
     @FunctionalInterface
     public interface ReportSection {
@@ -21,9 +20,8 @@ public class DataDrivenReportTemplate {
     }
 
     /**
-     * "Dane sterujące" – konfiguracja sekcji i ich kolejność.
-     * Dodanie nowej sekcji = dodanie wpisu tutaj (lub załadowanie z zewnątrz).
-     * Kod metody generate() pozostaje NIEZMIENIONY.
+     * Dane sterujące – konfiguracja sekcji i ich kolejność.
+     * Dodanie nowej sekcji = dodanie wpisu tutaj 
      */
     private static final List<ReportSection> SECTIONS = new ArrayList<>();
 
@@ -46,10 +44,6 @@ public class DataDrivenReportTemplate {
         return sb.toString();
     }
 
-    /**
-     * Domyślna logika treści raportu – odpowiednik body() z ReportTemplate.
-
-     */
     private static String buildBody(List<Transaction> transactions) {
         if (transactions.isEmpty()) return "brak transakcji";
         return "transactions=" + transactions.size()

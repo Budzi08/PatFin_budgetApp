@@ -19,7 +19,6 @@ public class MonthlyStatsCalculator {
     /**
      * Przetwarza surowe wiersze z repozytorium (rok, miesiąc, typ, kwota)
      * na listę StatisticsDto.MonthlyStats.
-     * Zachowuje oryginalne użycie wzorca Flyweight (TransactionTypeSchemaFactory).
      */
 
 // Tydzień 9 STARY KOD, dostosuj 3 funkcje tak by były tylko na jednym poziomie abstrakcji, kolejno wywoływane funkcje coraz bardziej szczegółowe (top to botom)
