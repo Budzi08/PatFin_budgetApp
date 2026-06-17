@@ -17,8 +17,6 @@ public class TransactionFilterService {
 
     /**
      * Filtruje podaną listę transakcji według opcjonalnych kryteriów.
-     * Używa wzorca Interpreter (AndExpression) – dokładnie tak jak w oryginale,
-     * ale w dedykowanej klasie.
      */
     public List<Transaction> filter(List<Transaction> transactions,
                                     BigDecimal minAmount,

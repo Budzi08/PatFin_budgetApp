@@ -40,10 +40,6 @@ public class TransactionFactory {
                     .user(user)
                     .build();
 
-    /**
-     * Tworzy transakcję odpowiedniego typu.
-     * Jedyna metoda publiczna – całość odpowiedzialności klasy.
-     */
     public Transaction create(TransactionType type, BigDecimal amount, String description,
                               LocalDate date, Category category, User user) {
         Builder builder = switch (type) {

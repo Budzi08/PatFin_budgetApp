@@ -10,7 +10,7 @@ import java.util.Map;
 public class ObserverRegistry {
 
     /**
-     * "Dane sterujące" – konfiguracja aktywnych obserwatorów.
+     * Dane sterujące – konfiguracja aktywnych obserwatorów.
      */
     private static final Map<String, TransactionObserver> OBSERVER_CONFIG = new LinkedHashMap<>();
 
@@ -21,9 +21,6 @@ public class ObserverRegistry {
         // Rozszerzenie to nowy wpis
     }
 
-    /**
-     * Powiadamia wszystkich zarejestrowanych obserwatorów.
-     */
     public static void notifyAll(Transaction transaction, List<String> sink) {
         for (TransactionObserver observer : OBSERVER_CONFIG.values()) {
             observer.onTransaction(transaction, sink);

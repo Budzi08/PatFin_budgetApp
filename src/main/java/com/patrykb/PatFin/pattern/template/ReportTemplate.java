@@ -15,7 +15,7 @@ public abstract class ReportTemplate {
         StringBuilder sb = new StringBuilder();
         sb.append(header(user));
 
-        // OCP: hook – opcjonalna sekcja przed body, domyślnie pusta
+        // OCP: hook
         String pre = preBody(transactions);
         if (!pre.isEmpty()) {
             sb.append(" | ").append(pre);
@@ -23,7 +23,7 @@ public abstract class ReportTemplate {
 
         sb.append(" | ").append(body(transactions));
 
-        // OCP: hook – opcjonalna sekcja po body, domyślnie pusta
+        // OCP: hook
         String post = postBody(transactions);
         if (!post.isEmpty()) {
             sb.append(" | ").append(post);
@@ -40,14 +40,14 @@ public abstract class ReportTemplate {
     protected abstract String body(List<Transaction> transactions);
 
     /**
-     * OCP: hook method – domyślnie pusta, podklasa nadpisuje bez zmiany generate().
+     * OCP: hook method
      */
     protected String preBody(List<Transaction> transactions) {
         return "";
     }
 
     /**
-     * OCP: hook method – domyślnie pusta, podklasa nadpisuje bez zmiany generate().
+     * OCP: hook method
      */
     protected String postBody(List<Transaction> transactions) {
         return "";

@@ -19,7 +19,6 @@ public class MonthlyStatsCalculator {
     /**
      * Przetwarza surowe wiersze z repozytorium (rok, miesiąc, typ, kwota)
      * na listę StatisticsDto.MonthlyStats.
-     * Zachowuje oryginalne użycie wzorca Flyweight (TransactionTypeSchemaFactory).
      */
     public List<StatisticsDto.MonthlyStats> calculate(List<Object[]> rawResults) {
         Map<String, StatisticsDto.MonthlyStats> monthlyMap = new HashMap<>();
