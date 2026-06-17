@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.List;
 
-
 @Service
 public class TransactionService {
 
@@ -53,9 +52,13 @@ public class TransactionService {
         }
 
         // SRP: delegujemy tworzenie obiektu do TransactionFactory
-        Transaction transaction = transactionFactory.create(
-                dto.getType(), dto.getAmount(), dto.getDescription(),
-                dto.getDate(), category, user);
+        // Tydzień 9 STARY KOD, dostosuj 3 funkcje tak, by przyjmowały maksymalnie 3 argumenty
+        // Transaction transaction = transactionFactory.create(
+        //         dto.getType(), dto.getAmount(), dto.getDescription(),
+        //         dto.getDate(), category, user);
+
+        // Tydzień 9 wykonano: wywołanie zaktualizowanej metody create przyjmującej 3 argumenty (wykorzystanie Parameter Object DTO)
+        Transaction transaction = transactionFactory.create(dto, category, user);
 
         Transaction saved = transactionRepository.save(transaction);
         AuditLogger.INSTANCE.logTransaction(user.getEmail(), "CREATE", saved.getId());
@@ -94,4 +97,3 @@ public class TransactionService {
         mediator.notify(this, "TRANSACTION_DELETED");
     }
 }
-
